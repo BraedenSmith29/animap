@@ -14,6 +14,11 @@ type FetchGraphResponse struct {
 }
 
 func HandleFetchGraph(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	animeId, err := strconv.Atoi(r.PathValue("animeId"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

@@ -4,6 +4,8 @@ import (
 	"container/list"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"os"
 	"slices"
@@ -128,7 +130,16 @@ func fetchAnimeInfo(animeId int) (AnimeInfo, error) {
 		return AnimeInfo{}, err
 	}
 	// Ensure body is closed after return
-	defer malResponse.Body.Close()
+	defer func(Body io.ReadCloser) {
+		cerr := Body.Close()
+		if cerr != nil {
+			log.Printf("warning: closing MAL response body failed: %v\n", cerr)
+		}
+	}(malResponse.Body)
+
+	if malResponse.StatusCode != http.StatusOK {
+		return AnimeInfo{}, fmt.Errorf("MAL API returned non-OK status: %d", malResponse.StatusCode)
+	}
 
 	animeInfo := AnimeInfo{}
 	err = json.NewDecoder(malResponse.Body).Decode(&animeInfo)
