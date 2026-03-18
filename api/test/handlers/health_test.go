@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/braedensmith29/animap/src/handlers"
+	"github.com/braedensmith29/animap/src/server/handlers"
 )
 
 func TestHandleGetHealthReturnsOK(t *testing.T) {
