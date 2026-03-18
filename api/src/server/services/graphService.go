@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type MainPicture struct {
@@ -116,6 +117,10 @@ func getAnimeDetails(animeId int, ignoreOther bool) (Anime, []Edge, error) {
 	return anime, edges, nil
 }
 
+var malHttpClient = &http.Client{
+	Timeout: time.Second * 10,
+}
+
 func fetchAnimeInfo(animeId int) (AnimeInfo, error) {
 	xMalClientId := os.Getenv("X_MAL_CLIENT_ID")
 	if xMalClientId == "" {
@@ -132,7 +137,7 @@ func fetchAnimeInfo(animeId int) (AnimeInfo, error) {
 		return AnimeInfo{}, err
 	}
 	malRequest.Header.Set("X-MAL-CLIENT-ID", xMalClientId)
-	malResponse, err := http.DefaultClient.Do(malRequest)
+	malResponse, err := malHttpClient.Do(malRequest)
 	if err != nil {
 		return AnimeInfo{}, err
 	}
