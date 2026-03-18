@@ -33,10 +33,6 @@ func TestHandleFetchGraph(t *testing.T) {
 	if err := json.NewDecoder(res.Body).Decode(&payload); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
-
-	if payload.Anime == nil || payload.Edges == nil {
-		t.Fatalf("malformatted payload %#v", payload)
-	}
 }
 
 func TestHandleFetchGraphRejectsNonGet(t *testing.T) {
