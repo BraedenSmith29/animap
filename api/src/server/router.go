@@ -9,7 +9,6 @@ import (
 func NewRouter() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/health", handlers.HandleGetHealth)
-	mux.HandleFunc("/api/v1/random", handlers.HandleGetRandomNumber)
-	mux.HandleFunc("/api/v1/graph", handlers.HandleFetchGraph)
+	mux.HandleFunc("/api/v1/fetchGraph/{animeId}", handlers.HandleFetchGraph)
 	return mux
 }

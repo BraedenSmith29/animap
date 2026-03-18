@@ -1,37 +1,34 @@
 package handlers
 
 import (
-	"io"
+	"encoding/json"
 	"net/http"
-	"os"
+	"strconv"
+
+	"github.com/braedensmith29/animap/src/server/services"
 )
 
-func HandleFetchGraph(w http.ResponseWriter, r *http.Request) {
-	// Make a request to the MyAnimeList API to fetch the anime graph data
-	malRequest, err := http.NewRequest("GET", "https://api.myanimelist.net/v2/anime/30230?fields=id,title,main_picture,alternative_titles,related_anime,related_manga", nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	malRequest.Header.Set("X-MAL-CLIENT-ID", os.Getenv("X_MAL_CLIENT_ID"))
-	malResponse, err := http.DefaultClient.Do(malRequest)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// Ensure body is closed after return
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	}(malResponse.Body)
+type FetchGraphResponse struct {
+	Anime []services.Anime `json:"anime"`
+	Edges []services.Edge  `json:"edges"`
+}
 
-	// Parrot the response from MyAnimeList back to the client
-	w.Header().Set("Content-Type", malResponse.Header.Get("Content-Type"))
-	_, err = io.Copy(w, malResponse.Body)
+func HandleFetchGraph(w http.ResponseWriter, r *http.Request) {
+	animeId, err := strconv.Atoi(r.PathValue("animeId"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	anime, edges, err := services.GetAnimeGraph(animeId, true)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	response := FetchGraphResponse{Anime: anime, Edges: edges}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 		return
 	}
 }
