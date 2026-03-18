@@ -26,10 +26,10 @@ func TestRoutes(t *testing.T) {
 		t.Fatalf("expected health route status %d, got %d", http.StatusOK, healthRes.Code)
 	}
 
-	randomReq := httptest.NewRequest(http.MethodGet, "/api/v1/fetchGraph/52991", nil)
-	randomRes := httptest.NewRecorder()
-	router.ServeHTTP(randomRes, randomReq)
-	if randomRes.Code != http.StatusOK {
-		t.Fatalf("expected random route status %d, got %d", http.StatusOK, randomRes.Code)
+	fetchGraphReq := httptest.NewRequest(http.MethodGet, "/api/v1/fetchGraph/52991", nil)
+	fetchGraphRes := httptest.NewRecorder()
+	router.ServeHTTP(fetchGraphRes, fetchGraphReq)
+	if fetchGraphRes.Code != http.StatusOK {
+		t.Fatalf("expected fetchGraph route status %d, got %d", http.StatusOK, fetchGraphRes.Code)
 	}
 }

@@ -22,11 +22,13 @@ func HandleFetchGraph(w http.ResponseWriter, r *http.Request) {
 	animeId, err := strconv.Atoi(r.PathValue("animeId"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	anime, edges, err := services.GetAnimeGraph(animeId, true)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	response := FetchGraphResponse{Anime: anime, Edges: edges}

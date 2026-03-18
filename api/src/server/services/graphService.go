@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"slices"
 )
 
 type MainPicture struct {
@@ -57,6 +56,8 @@ func GetAnimeGraph(animeId int, ignoreOther bool) ([]Anime, []Edge, error) {
 
 	queue := list.List{}
 	queue.PushBack(animeId)
+	alreadyQueued := make(map[int]bool)
+	alreadyQueued[animeId] = true
 
 	for queue.Len() > 0 {
 		nextAnimeId := queue.Front()
@@ -75,8 +76,9 @@ func GetAnimeGraph(animeId int, ignoreOther bool) ([]Anime, []Edge, error) {
 
 		// Add related anime to the queue
 		for _, edge := range newEdges {
-			if !slices.ContainsFunc(anime, func(a Anime) bool { return a.Id == edge.Target }) {
+			if !alreadyQueued[edge.Target] {
 				queue.PushBack(edge.Target)
+				alreadyQueued[edge.Target] = true
 			}
 		}
 	}
@@ -115,6 +117,11 @@ func getAnimeDetails(animeId int, ignoreOther bool) (Anime, []Edge, error) {
 }
 
 func fetchAnimeInfo(animeId int) (AnimeInfo, error) {
+	xMalClientId := os.Getenv("X_MAL_CLIENT_ID")
+	if xMalClientId == "" {
+		return AnimeInfo{}, fmt.Errorf("X_MAL_CLIENT_ID not set")
+	}
+
 	// Make a request to the MyAnimeList API to fetch the anime graph data
 	malRequest, err := http.NewRequest(
 		"GET",
@@ -124,7 +131,7 @@ func fetchAnimeInfo(animeId int) (AnimeInfo, error) {
 	if err != nil {
 		return AnimeInfo{}, err
 	}
-	malRequest.Header.Set("X-MAL-CLIENT-ID", os.Getenv("X_MAL_CLIENT_ID"))
+	malRequest.Header.Set("X-MAL-CLIENT-ID", xMalClientId)
 	malResponse, err := http.DefaultClient.Do(malRequest)
 	if err != nil {
 		return AnimeInfo{}, err
