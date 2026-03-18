@@ -5,11 +5,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/braedensmith29/animap/src"
+	"github.com/braedensmith29/animap/src/server"
 )
 
 func TestRoutes(t *testing.T) {
-	router := src.NewRouter()
+	router := server.NewRouter()
 
 	healthReq := httptest.NewRequest(http.MethodGet, "/api/v1/health", nil)
 	healthRes := httptest.NewRecorder()
