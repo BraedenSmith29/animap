@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/braedensmith29/animap/src/server/services"
 )
@@ -21,6 +22,11 @@ func HandleFetchGraph(w http.ResponseWriter, r *http.Request) {
 	animeId := r.PathValue("animeId")
 	if animeId == "" {
 		http.Error(w, "animeId not specified", http.StatusBadRequest)
+		return
+	}
+	_, err := strconv.Atoi(animeId)
+	if err != nil {
+		http.Error(w, "animeId must be an integer", http.StatusBadRequest)
 		return
 	}
 

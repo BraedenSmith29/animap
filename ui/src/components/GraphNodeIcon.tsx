@@ -1,4 +1,4 @@
-import {CircularImage} from "./CircularImage.tsx";
+import { CircularImage } from "./CircularImage.tsx";
 
 interface Props {
     malUrl: string;

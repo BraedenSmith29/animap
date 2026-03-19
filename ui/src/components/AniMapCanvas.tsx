@@ -1,5 +1,5 @@
 import { darkTheme, GraphCanvas } from "reagraph";
-import {GraphNodeIcon} from "./GraphNodeIcon.tsx";
+import { GraphNodeIcon } from "./GraphNodeIcon.tsx";
 import type { Anime, Edge } from "../types/graph";
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 
 export function AniMapCanvas({ nodes, edges }: Props) {
     return (
-        <div style={{ position: 'relative', width: '75%', height: '1000px' }}>
+        <div>
             <GraphCanvas
                 nodes={nodes}
                 edges={edges}

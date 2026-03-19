@@ -31,7 +31,7 @@ export function CircularImage({ url, scale }: Props) {
         texture.wrapT = THREE.ClampToEdgeWrapping;
         texture.needsUpdate = true;
     }, [texture]);
-    
+
     return (
         <mesh scale={[scale, scale, 1]}>
             <circleGeometry args={[1, 64]} />
