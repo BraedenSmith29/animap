@@ -60,23 +60,27 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Pro
                     <Icon type="close" />
                 </button>
                 <p className="sidebar__heading">Details</p>
-                <button type="button" className="sidebar__button" onClick={onClose} aria-label="Close sidebar">
+                <button type="button" className="sidebar__button" aria-label="Close sidebar">
                     <Icon type="dots-three" />
                 </button>
             </div>
 
             <div className="sidebar__content">
-                <a
-                    className="sidebar__image-link"
-                    href={`https://myanimelist.net/anime/${anime.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
+                <div className="sidebar__image-link">
                     {coverUrl ? (
                         <img className="sidebar__image" src={coverUrl} alt={`${title} cover`} />
                     ) : (
                         <span className="sidebar__image-fallback">No cover image</span>
                     )}
+                </div>
+
+                <a
+                    className="sidebar__mal-link"
+                    href={`https://myanimelist.net/anime/${anime.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    View on MyAnimeList
                 </a>
 
                 <h2 className="sidebar__title">{title}</h2>
