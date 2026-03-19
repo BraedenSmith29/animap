@@ -1,12 +1,26 @@
 import { useEffect, useState } from 'react';
-import { AniMapCanvas } from '../components';
-import type { GraphResponse } from '../types/graph.ts';
+import { AniMapCanvas, AnimeDetailsSidebar } from '../components';
+import type { Anime, GraphResponse } from '../types/graph.ts';
 import { useParams } from 'react-router';
 import { SearchBar } from '../components/searchBar/SearchBar.tsx';
 
 export function Graph() {
     const { animeId } = useParams();
     const [graph, setGraph] = useState<GraphResponse>({ anime: [], edges: [] });
+    const [selectedAnime, setSelectedAnime] = useState<Anime | null>(null);
+    const [isSidebarClosing, setIsSidebarClosing] = useState(false);
+
+    const handleSelectedAnime = (anime: Anime | null) => {
+        if (anime) {
+            setIsSidebarClosing(false);
+            setSelectedAnime(anime);
+            return;
+        }
+
+        if (selectedAnime) {
+            setIsSidebarClosing(true);
+        }
+    };
 
     const updateGraph = () => {
         if (localStorage.getItem(`graph-${animeId}`)) {
@@ -24,9 +38,20 @@ export function Graph() {
     useEffect(updateGraph, [animeId]);
 
     return <>
-        <div style={{ position: 'relative', zIndex: 1, margin: 10 }}>
+        <div style={{ position: 'relative', margin: 10, zIndex: 1 }}>
             <SearchBar />
         </div>
-        <AniMapCanvas nodes={graph.anime} edges={graph.edges} />
+        <AniMapCanvas nodes={graph.anime} edges={graph.edges} setSelectedAnime={handleSelectedAnime} />
+        {selectedAnime && (
+            <AnimeDetailsSidebar
+                anime={selectedAnime}
+                isClosing={isSidebarClosing}
+                onClose={() => handleSelectedAnime(null)}
+                onClosed={() => {
+                    setSelectedAnime(null);
+                    setIsSidebarClosing(false);
+                }}
+            />
+        )}
     </>;
 }

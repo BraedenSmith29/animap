@@ -35,6 +35,13 @@ export function Icon({ className, type, color }: Props) {
                         1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0
                         1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
             </svg>;
+        case 'dots-three':
+            return <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill={color}>
+                <rect width="24" height="24" fill="none" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="19" cy="12" r="1.5" />
+                <circle cx="5" cy="12" r="1.5" />
+            </svg>;
         default:
             console.error('Unknown type', type);
     }

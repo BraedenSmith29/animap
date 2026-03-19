@@ -1,0 +1,217 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: clamp(320px, 29vw, 420px);
+    height: 100vh;
+    background-color: var(--color-bg-secondary);
+    border-left: 1px solid var(--color-border-primary);
+    box-sizing: border-box;
+    padding: 0.95rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    animation: sidebar-swipe-in 240ms ease-out both;
+    z-index: 10;
+}
+
+.sidebar--closing {
+    animation: sidebar-swipe-out 200ms ease-in both;
+}
+
+.sidebar__header {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.sidebar__title {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 2rem;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+}
+
+.sidebar__heading {
+    margin: auto;
+    font-size: 1.05rem;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.sidebar__button {
+    border: 1px solid var(--color-border-primary);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border-radius: 8px;
+    width: 1.85rem;
+    height: 1.85rem;
+    cursor: pointer;
+    font-size: 1.3rem;
+    line-height: 1;
+    flex-shrink: 0;
+    padding: 0;
+    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.sidebar__button:hover {
+    color: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+}
+
+.sidebar__content {
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-right: 0.2rem;
+}
+
+.sidebar__image-link {
+    display: inline-flex;
+    align-self: center;
+    max-width: 100%;
+    min-height: 160px;
+    max-height: 38vh;
+    border: 1px solid var(--color-border-primary);
+    border-radius: 10px;
+    background: var(--color-bg-tertiary);
+    padding: 0.3rem;
+}
+
+.sidebar__image {
+    display: block;
+    max-width: 100%;
+    max-height: calc(38vh - 0.6rem);
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.sidebar__image-fallback {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    padding: 0.6rem;
+}
+
+.sidebar__subtitle {
+    margin: -0.15rem 0 0;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    color: var(--color-text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.sidebar__stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+}
+
+.sidebar__stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border-radius: 12px;
+    padding: 0.7rem 0.8rem;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-primary);
+}
+
+.sidebar__stat-label {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+.sidebar__stat-value {
+    color: var(--color-text-primary);
+    font-size: 1.45rem;
+    line-height: 1;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.sidebar__meta-card {
+    border-radius: 10px;
+    padding: 0.75rem 0.85rem;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-primary);
+    color: var(--color-text-primary);
+}
+
+.sidebar__meta-card p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.sidebar__meta-card p + p {
+    margin-top: 0.5rem;
+}
+
+.sidebar__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.sidebar__chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.3rem 0.62rem;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-primary);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.sidebar__synopsis {
+    margin: 0.1rem 0 0;
+    color: var(--color-text-primary);
+    font-size: 1.02rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.sidebar__details {
+    margin: 0.25rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--color-border-primary);
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        width: min(92vw, 420px);
+    }
+}
+
+@keyframes sidebar-swipe-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes sidebar-swipe-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+
