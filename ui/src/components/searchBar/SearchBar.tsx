@@ -1,8 +1,8 @@
 import './SearchBar.css';
-import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
-import { Icon } from "../Icon.tsx";
-import { useNavigate } from "react-router";
-import { SearchBarDropdown } from "./SearchBarDropdown.tsx";
+import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { Icon } from '../Icon.tsx';
+import { useNavigate } from 'react-router';
+import { SearchBarDropdown } from './SearchBarDropdown.tsx';
 
 const MOCK_ANIME: { id: number; title: string; }[] = [
     { id: 121, title: 'Fullmetal Alchemist (2003)' },
@@ -24,7 +24,7 @@ export function SearchBar() {
     const [open, setOpen] = useState(false);
     const [activeIdx, setActiveIdx] = useState(-1);
 
-    const onInputChange = useCallback((newValue: string) => {
+    const onInputChange = (newValue: string) => {
         setQuery(newValue);
         const q = newValue.trim().toLowerCase();
         if (!q) {
@@ -39,7 +39,7 @@ export function SearchBar() {
         setResults(filtered);
         setOpen(true);
         setActiveIdx(0);
-    }, []);
+    };
 
     useEffect(() => {
         function handleClick(e: MouseEvent) {
@@ -52,6 +52,14 @@ export function SearchBar() {
         return () => document.removeEventListener('mousedown', handleClick);
     }, []);
 
+    const selectOption = (animeId: number) => {
+        navigate(`/${animeId}`);
+        setOpen(false);
+        setQuery('');
+        setResults([]);
+        setActiveIdx(-1);
+    }
+
     function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
         if (!open) return;
         if (e.key === 'ArrowDown') {
@@ -63,8 +71,7 @@ export function SearchBar() {
         } else if (e.key === 'Escape') {
             setOpen(false);
         } else if (e.key === 'Enter' && activeIdx >= 0 && results.length > activeIdx) {
-            navigate(`/${results[activeIdx].id}`);
-            setOpen(false);
+            selectOption(results[activeIdx].id);
         }
     }
 
@@ -93,6 +100,13 @@ export function SearchBar() {
                 </button>
             )}
         </div>
-        {open && <SearchBarDropdown results={results} activeIdx={activeIdx} setActiveIdx={setActiveIdx} />}
+        {open &&
+            <SearchBarDropdown
+                results={results}
+                activeIdx={activeIdx}
+                setActiveIdx={setActiveIdx}
+                selectOption={selectOption}
+            />
+        }
     </div>;
 }

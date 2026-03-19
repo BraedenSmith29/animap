@@ -1,6 +1,6 @@
 import './Home.css';
-import { Icon } from "../components/Icon.tsx";
-import { SearchBar } from "../components/searchBar/SearchBar.tsx";
+import { Icon } from '../components/Icon.tsx';
+import { SearchBar } from '../components/searchBar/SearchBar.tsx';
 
 
 export function Home() {

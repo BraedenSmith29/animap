@@ -1,6 +1,6 @@
-import { darkTheme, GraphCanvas } from "reagraph";
-import { GraphNodeIcon } from "./GraphNodeIcon.tsx";
-import type { Anime, Edge } from "../types/graph";
+import { darkTheme, GraphCanvas } from 'reagraph';
+import { GraphNodeIcon } from './GraphNodeIcon.tsx';
+import type { Anime, Edge } from '../types/graph';
 
 interface Props {
     nodes: Anime[];

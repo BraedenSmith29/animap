@@ -10,21 +10,21 @@ export function Icon({ className, type, color }: Props) {
     }
 
     switch (type) {
-        case "search":
+        case 'search':
             return <svg className={className} width="16" height="16" viewBox="0 0 24 24"
                         fill="none" stroke={color} strokeWidth="2.2"
                         strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-        case "close":
+            </svg>;
+        case 'close':
             return <svg className={className} width="14" height="14" viewBox="0 0 24 24"
                         fill="none" stroke={color} strokeWidth="2.5"
                         strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-        case "github":
+            </svg>;
+        case 'github':
             return <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill={color}>
                 <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482
                         0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462
@@ -34,8 +34,8 @@ export function Icon({ className, type, color }: Props) {
                         0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699
                         1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0
                         1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
-            </svg>
+            </svg>;
         default:
-            console.error("Unknown type", type)
+            console.error('Unknown type', type);
     }
 }
