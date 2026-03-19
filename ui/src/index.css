@@ -1,20 +1,23 @@
 :root {
     /* ── Base & Background ────────────────────── */
-    --color-bg-primary: #1e2026;
-    --color-bg-secondary: #252830;
-    --color-bg-tertiary: #2e3140;
+    --color-bg-primary: #0f121a;
+    --color-bg-secondary: #11141d;
+    --color-bg-tertiary: #1d2230;
 
     /* ── Text & Foreground ────────────────────── */
-    --color-text-primary: #e8eaf0;
-    --color-text-secondary: #6b7280;
-    --color-text-tertiary: #4b5060;
+    --color-text-primary: #eef1f7;
+    --color-text-secondary: #a2a9b9;
+    --color-text-tertiary: #6f7689;
 
     /* ── Accent ───────────────────────────────── */
-    --color-accent-primary: #5b8af0;
-    --color-accent-light: rgba(91, 138, 240, 0.15);
+    --color-accent-primary: #8ca8ff;
+    --color-accent-light: rgba(140, 168, 255, 0.16);
 
     /* ── Borders ──────────────────────────────── */
-    --color-border-primary: #363a46;
+    --color-border-primary: #2b3242;
+
+    /* ── Graph ────────────────────────────────── */
+    --graph-edge-fill: #4d5568;
 
 
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
