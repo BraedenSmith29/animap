@@ -15,7 +15,7 @@ func TestBuildGraph(t *testing.T) {
 		t.Fatalf("Error loading .env file. Ensure you are running from /api.")
 	}
 
-	anime, edges, err := services.GetAnimeGraph(52991, true)
+	anime, edges, err := services.GetAnimeGraph("52991", true)
 	if err != nil {
 		t.Fatalf("failed to build graph: %v", err)
 	}

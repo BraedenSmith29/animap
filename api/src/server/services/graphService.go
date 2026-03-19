@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -17,7 +18,8 @@ type MainPicture struct {
 }
 
 type Anime struct {
-	Id          int         `json:"id"`
+	Id          string      `json:"id"`
+	Label       string      `json:"label"`
 	Title       string      `json:"title"`
 	EnTitle     string      `json:"en_title"`
 	JpTitle     string      `json:"jp_title"`
@@ -25,9 +27,10 @@ type Anime struct {
 }
 
 type Edge struct {
-	Source       int    `json:"source"`
-	Target       int    `json:"target"`
+	Source       string `json:"source"`
+	Target       string `json:"target"`
 	Id           string `json:"id"`
+	Label        string `json:"label"`
 	Relationship string `json:"relationship"`
 }
 
@@ -51,13 +54,13 @@ type AnimeInfo struct {
 	} `json:"related_anime"`
 }
 
-func GetAnimeGraph(animeId int, ignoreOther bool) ([]Anime, []Edge, error) {
+func GetAnimeGraph(animeId string, ignoreOther bool) ([]Anime, []Edge, error) {
 	var anime []Anime
 	var edges []Edge
 
 	queue := list.List{}
 	queue.PushBack(animeId)
-	alreadyQueued := make(map[int]bool)
+	alreadyQueued := make(map[string]bool)
 	alreadyQueued[animeId] = true
 
 	for queue.Len() > 0 {
@@ -66,14 +69,14 @@ func GetAnimeGraph(animeId int, ignoreOther bool) ([]Anime, []Edge, error) {
 			break
 		}
 		queue.Remove(nextAnimeId)
-		newAnime, newEdges, err := getAnimeDetails(nextAnimeId.Value.(int), ignoreOther)
+		newAnime, newEdges, err := getAnimeDetails(nextAnimeId.Value.(string), ignoreOther)
 		if err != nil {
 			return nil, nil, err
 		}
 
 		// Process the animeInfo and edges here
 		anime = append(anime, newAnime)
-		edges = append(edges, newEdges...)
+		//edges = append(edges, newEdges...)
 
 		// Add related anime to the queue
 		for _, edge := range newEdges {
@@ -81,20 +84,24 @@ func GetAnimeGraph(animeId int, ignoreOther bool) ([]Anime, []Edge, error) {
 				queue.PushBack(edge.Target)
 				alreadyQueued[edge.Target] = true
 			}
+			if !(edge.Relationship == "prequel" || edge.Relationship == "parent_story") {
+				edges = append(edges, edge)
+			}
 		}
 	}
 
 	return anime, edges, nil
 }
 
-func getAnimeDetails(animeId int, ignoreOther bool) (Anime, []Edge, error) {
+func getAnimeDetails(animeId string, ignoreOther bool) (Anime, []Edge, error) {
 	animeInfo, err := fetchAnimeInfo(animeId)
 	if err != nil {
 		return Anime{}, nil, err
 	}
 
 	anime := Anime{
-		Id:          animeInfo.Id,
+		Id:          strconv.Itoa(animeInfo.Id),
+		Label:       animeInfo.Title,
 		Title:       animeInfo.Title,
 		EnTitle:     animeInfo.AlternativeTitles.En,
 		JpTitle:     animeInfo.AlternativeTitles.Jp,
@@ -107,10 +114,11 @@ func getAnimeDetails(animeId int, ignoreOther bool) (Anime, []Edge, error) {
 			continue
 		}
 		edge := Edge{
-			Source:       animeInfo.Id,
-			Target:       related.Node.Id,
+			Source:       strconv.Itoa(animeInfo.Id),
+			Target:       strconv.Itoa(related.Node.Id),
 			Id:           fmt.Sprintf("%d-%d", animeInfo.Id, related.Node.Id),
-			Relationship: related.RelationTypeFormatted,
+			Label:        related.RelationTypeFormatted,
+			Relationship: related.RelationType,
 		}
 		edges = append(edges, edge)
 	}
@@ -121,7 +129,7 @@ var malHttpClient = &http.Client{
 	Timeout: time.Second * 10,
 }
 
-func fetchAnimeInfo(animeId int) (AnimeInfo, error) {
+func fetchAnimeInfo(animeId string) (AnimeInfo, error) {
 	xMalClientId := os.Getenv("X_MAL_CLIENT_ID")
 	if xMalClientId == "" {
 		return AnimeInfo{}, fmt.Errorf("X_MAL_CLIENT_ID not set")
@@ -130,7 +138,7 @@ func fetchAnimeInfo(animeId int) (AnimeInfo, error) {
 	// Make a request to the MyAnimeList API to fetch the anime graph data
 	malRequest, err := http.NewRequest(
 		"GET",
-		fmt.Sprintf("https://api.myanimelist.net/v2/anime/%d?fields=id,title,main_picture,alternative_titles,related_anime,related_manga", animeId),
+		fmt.Sprintf("https://api.myanimelist.net/v2/anime/%s?fields=id,title,main_picture,alternative_titles,related_anime,related_manga", animeId),
 		nil,
 	)
 	if err != nil {

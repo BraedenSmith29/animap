@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/braedensmith29/animap/src/server/services"
 )
@@ -19,13 +18,13 @@ func HandleFetchGraph(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	animeId, err := strconv.Atoi(r.PathValue("animeId"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	animeId := r.PathValue("animeId")
+	if animeId == "" {
+		http.Error(w, "animeId not specified", http.StatusBadRequest)
 		return
 	}
 
-	anime, edges, err := services.GetAnimeGraph(animeId, true)
+	anime, edges, err := services.GetAnimeGraph(animeId, false)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
