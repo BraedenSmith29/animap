@@ -2,7 +2,7 @@ interface Props {
     results: { id: number; title: string }[];
     activeIdx: number;
     setActiveIdx: (index: number) => void;
-    selectOption: (index: number) => void;
+    selectOption: (animeId: number) => void;
 }
 
 export function SearchBarDropdown({ results, activeIdx, setActiveIdx, selectOption }: Props) {

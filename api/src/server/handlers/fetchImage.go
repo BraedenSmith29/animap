@@ -1,12 +1,20 @@
 package handlers
 
 import (
+	"errors"
 	"io"
 	"log"
 	"mime"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
+)
+
+const (
+	imageFetchTimeout = 10 * time.Second
+	maxImageBytes     = 5 << 20 // 5 MiB
 )
 
 func HandleFetchImage(w http.ResponseWriter, r *http.Request) {
@@ -37,9 +45,15 @@ func HandleFetchImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch the image from the provided URL
-	resp, err := http.Get(parsedURL.String())
+	client := &http.Client{Timeout: imageFetchTimeout}
+	resp, err := client.Get(parsedURL.String())
 	if err != nil {
+		var netErr net.Error
+		if errors.As(err, &netErr) && netErr.Timeout() {
+			http.Error(w, "image fetch timed out", http.StatusGatewayTimeout)
+			return
+		}
+
 		http.Error(w, "failed to fetch image", http.StatusInternalServerError)
 		return
 	}
@@ -66,8 +80,18 @@ func HandleFetchImage(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", contentType)
 	}
 
-	// Copy the image data to the response writer
-	if _, err := io.Copy(w, resp.Body); err != nil {
+	// Cap upstream response size to avoid unbounded reads.
+	imageData, err := io.ReadAll(io.LimitReader(resp.Body, maxImageBytes+1))
+	if err != nil {
+		http.Error(w, "failed to read image data", http.StatusInternalServerError)
+		return
+	}
+	if int64(len(imageData)) > maxImageBytes {
+		http.Error(w, "fetched image is too large", http.StatusBadGateway)
+		return
+	}
+
+	if _, err := w.Write(imageData); err != nil {
 		http.Error(w, "failed to write image data", http.StatusInternalServerError)
 		return
 	}
@@ -77,4 +101,3 @@ func isAllowedMALHost(hostname string) bool {
 	host := strings.ToLower(strings.TrimSuffix(hostname, "."))
 	return host == "myanimelist.net" || strings.HasSuffix(host, ".myanimelist.net")
 }
-

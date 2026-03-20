@@ -23,7 +23,7 @@ export function Graph() {
         }
     };
 
-    const updateGraph = () => {
+    useEffect(() => {
         if (localStorage.getItem(`graph-${animeId}`)) {
             setGraph(JSON.parse(localStorage.getItem(`graph-${animeId}`)!));
         } else {
@@ -34,9 +34,7 @@ export function Graph() {
                     localStorage.setItem(`graph-${animeId}`, JSON.stringify(graph));
                 });
         }
-    };
-
-    useEffect(updateGraph, [animeId]);
+    }, [animeId]);
 
     return <>
         <div className="graph__header">
