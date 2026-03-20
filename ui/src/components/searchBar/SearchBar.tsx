@@ -100,7 +100,7 @@ export function SearchBar() {
                 </button>
             )}
         </div>
-        {open &&
+        {open && query &&
             <SearchBarDropdown
                 results={results}
                 activeIdx={activeIdx}
