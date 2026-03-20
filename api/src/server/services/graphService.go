@@ -13,17 +13,29 @@ import (
 )
 
 type MainPicture struct {
-	Medium string `json:"medium"`
-	Large  string `json:"large"`
+	Medium string  `json:"medium"`
+	Large  *string `json:"large"`
 }
 
 type Anime struct {
-	Id          string      `json:"id"`
-	Label       string      `json:"label"`
-	Title       string      `json:"title"`
-	EnTitle     string      `json:"en_title"`
-	JpTitle     string      `json:"jp_title"`
-	MainPicture MainPicture `json:"main_picture"`
+	Id                     string       `json:"id"`
+	Label                  string       `json:"label"`
+	Title                  string       `json:"title"`
+	EnTitle                *string      `json:"enTitle,omitempty"`
+	JaTitle                *string      `json:"jaTitle,omitempty"`
+	MainPicture            *MainPicture `json:"mainPicture,omitempty"`
+	StartDate              *string      `json:"startDate,omitempty"`
+	EndDate                *string      `json:"endDate,omitempty"`
+	Synopsis               *string      `json:"synopsis,omitempty"`
+	Mean                   *float64     `json:"meanScore,omitempty"`
+	NumListUsers           int          `json:"numListUsers"`
+	Nsfw                   *string      `json:"nsfw,omitempty"`
+	MediaType              string       `json:"mediaType"`
+	Status                 string       `json:"status"`
+	NumEpisodes            int          `json:"numEpisodes"`
+	Source                 *string      `json:"source,omitempty"`
+	AverageEpisodeDuration *int         `json:"averageEpisodeDuration,omitempty"`
+	Rating                 *string      `json:"rating,omitempty"`
 }
 
 type Edge struct {
@@ -35,19 +47,29 @@ type Edge struct {
 }
 
 type AnimeInfo struct {
-	Id                int         `json:"id"`
-	Title             string      `json:"title"`
-	MainPicture       MainPicture `json:"main_picture"`
-	AlternativeTitles struct {
-		Synonyms []string `json:"synonyms"`
-		En       string   `json:"en"`
-		Jp       string   `json:"jp"`
+	Id                int    `json:"id"`
+	Title             string `json:"title"`
+	AlternativeTitles *struct {
+		Synonyms *[]string `json:"synonyms"`
+		En       *string   `json:"en"`
+		Ja       *string   `json:"ja"`
 	} `json:"alternative_titles"`
-	RelatedAnime []struct {
+	MainPicture            *MainPicture `json:"main_picture"`
+	StartDate              *string      `json:"start_date"`
+	EndDate                *string      `json:"end_date"`
+	Synopsis               *string      `json:"synopsis"`
+	Mean                   *float64     `json:"mean"`
+	NumListUsers           int          `json:"num_list_users"`
+	Nsfw                   *string      `json:"nsfw"`
+	MediaType              string       `json:"media_type"`
+	Status                 string       `json:"status"`
+	NumEpisodes            int          `json:"num_episodes"`
+	Source                 *string      `json:"source"`
+	AverageEpisodeDuration *int         `json:"average_episode_duration"`
+	Rating                 *string      `json:"rating"`
+	RelatedAnime           []struct {
 		Node struct {
-			Id          int         `json:"id"`
-			Title       string      `json:"title"`
-			MainPicture MainPicture `json:"main_picture"`
+			Id int `json:"id"`
 		} `json:"node"`
 		RelationType          string `json:"relation_type"`
 		RelationTypeFormatted string `json:"relation_type_formatted"`
@@ -55,8 +77,8 @@ type AnimeInfo struct {
 }
 
 func GetAnimeGraph(animeId string, ignoreOther bool) ([]Anime, []Edge, error) {
-	var anime []Anime
-	var edges []Edge
+	anime := make([]Anime, 0)
+	edges := make([]Edge, 0)
 
 	queue := list.List{}
 	queue.PushBack(animeId)
@@ -99,13 +121,31 @@ func getAnimeDetails(animeId string, ignoreOther bool) (Anime, []Edge, error) {
 		return Anime{}, nil, err
 	}
 
+	var enTitle, jaTitle *string
+	if animeInfo.AlternativeTitles != nil {
+		enTitle = animeInfo.AlternativeTitles.En
+		jaTitle = animeInfo.AlternativeTitles.Ja
+	}
+
 	anime := Anime{
-		Id:          strconv.Itoa(animeInfo.Id),
-		Label:       animeInfo.Title,
-		Title:       animeInfo.Title,
-		EnTitle:     animeInfo.AlternativeTitles.En,
-		JpTitle:     animeInfo.AlternativeTitles.Jp,
-		MainPicture: animeInfo.MainPicture,
+		Id:                     strconv.Itoa(animeInfo.Id),
+		Label:                  animeInfo.Title,
+		Title:                  animeInfo.Title,
+		EnTitle:                enTitle,
+		JaTitle:                jaTitle,
+		MainPicture:            animeInfo.MainPicture,
+		StartDate:              animeInfo.StartDate,
+		EndDate:                animeInfo.EndDate,
+		Synopsis:               animeInfo.Synopsis,
+		Mean:                   animeInfo.Mean,
+		NumListUsers:           animeInfo.NumListUsers,
+		Nsfw:                   animeInfo.Nsfw,
+		MediaType:              animeInfo.MediaType,
+		Status:                 animeInfo.Status,
+		NumEpisodes:            animeInfo.NumEpisodes,
+		Source:                 animeInfo.Source,
+		AverageEpisodeDuration: animeInfo.AverageEpisodeDuration,
+		Rating:                 animeInfo.Rating,
 	}
 
 	var edges []Edge
@@ -138,7 +178,7 @@ func fetchAnimeInfo(animeId string) (AnimeInfo, error) {
 	// Make a request to the MyAnimeList API to fetch the anime graph data
 	malRequest, err := http.NewRequest(
 		"GET",
-		fmt.Sprintf("https://api.myanimelist.net/v2/anime/%s?fields=id,title,main_picture,alternative_titles,related_anime,related_manga", animeId),
+		fmt.Sprintf("https://api.myanimelist.net/v2/anime/%s?fields=id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,num_list_users,nsfw,media_type,status,num_episodes,source,average_episode_duration,rating,related_anime,related_manga", animeId),
 		nil,
 	)
 	if err != nil {

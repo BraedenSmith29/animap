@@ -36,11 +36,29 @@ const formatMonthYear = (value?: string) => {
 
 const formatNumber = (value?: number) => (typeof value === 'number' ? value.toLocaleString() : '-');
 const formatNumericValue = (value?: number) => (typeof value === 'number' && !Number.isNaN(value) ? value : '-');
+const formatRuntime = (seconds?: number) => {
+    if (typeof seconds !== 'number' || Number.isNaN(seconds)) {
+        return 'Unknown';
+    }
+
+    const totalMinutes = seconds / 60;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.floor(totalMinutes % 60);
+    if (hours > 0 && minutes > 0) {
+        return `${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+        return `${hours}h`;
+    } else if (minutes > 0) {
+        return `${minutes}m`;
+    } else {
+        return 'N/A'
+    }
+}
 
 export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Props) {
-    const coverUrl = anime.main_picture?.large || '';
+    const coverUrl = anime.mainPicture?.large || '';
     const title = anime.title || 'Untitled anime';
-    const subtitle = anime.en_title || anime.jp_title || 'No alternate title available';
+    const subtitle = anime.enTitle || anime.jaTitle || 'No alternate title available';
 
     const infoChips = [formatEnumValue(anime.source), formatEnumValue(anime.rating), formatEnumValue(anime.nsfw)].filter(
         (chip) => chip !== '-',
@@ -99,14 +117,21 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Pro
                         <span className="sidebar__stat-label">Type</span>
                         <span className="sidebar__stat-value">{formatEnumValue(anime.mediaType)}</span>
                     </div>
-                    <div className="sidebar__stat-card">
-                        <span className="sidebar__stat-label">Episodes</span>
-                        <span className="sidebar__stat-value">{formatNumericValue(anime.numEpisodes)}</span>
-                    </div>
+                    {anime.numEpisodes > 1 ?
+                        <div className="sidebar__stat-card">
+                            <span className="sidebar__stat-label">Episodes</span>
+                            <span className="sidebar__stat-value">{formatNumericValue(anime.numEpisodes)}</span>
+                        </div>
+                        : <div className="sidebar__stat-card">
+                            <span className="sidebar__stat-label">Runtime</span>
+                            <span
+                                className="sidebar__stat-value">{formatRuntime(anime.averageEpisodeDuration)}</span>
+                        </div>
+                    }
                 </div>
 
                 <div className="sidebar__meta-card">
-                    <p>{formatMonthYear(anime.startDate)}</p>
+                    <p>{formatMonthYear(anime.startDate)} - {formatMonthYear(anime.endDate)}</p>
                     <p>{formatEnumValue(anime.status)}</p>
                 </div>
 
