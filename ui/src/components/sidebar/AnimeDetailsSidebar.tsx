@@ -78,13 +78,13 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Pro
                     <Icon type="close" />
                 </button>
                 <p className="sidebar__heading">Details</p>
-                <button type="button" className="sidebar__button" aria-label="Close sidebar">
+                <button type="button" className="sidebar__button" aria-label="Options">
                     <Icon type="dots-three" />
                 </button>
             </div>
 
             <div className="sidebar__content">
-                <div className="sidebar__image-link">
+                <div className="sidebar__image-border">
                     {coverUrl ? (
                         <img className="sidebar__image" src={coverUrl} alt={`${title} cover`} />
                     ) : (

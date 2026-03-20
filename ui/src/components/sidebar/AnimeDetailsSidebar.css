@@ -71,12 +71,9 @@
     padding-right: 0.2rem;
 }
 
-.sidebar__image-link {
-    display: inline-flex;
+.sidebar__image-border {
     align-self: center;
-    max-width: 100%;
-    min-height: 160px;
-    max-height: 38vh;
+    min-width: 70%;
     border: 1px solid var(--color-border-primary);
     border-radius: 10px;
     background: var(--color-bg-tertiary);
@@ -85,8 +82,8 @@
 
 .sidebar__image {
     display: block;
-    max-width: 100%;
-    max-height: calc(38vh - 0.6rem);
+    width: 100%;
+    max-height: 35vh;
     object-fit: contain;
     border-radius: 8px;
 }
