@@ -19,13 +19,18 @@ func HandleFetchGraph(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	animeId, err := strconv.Atoi(r.PathValue("animeId"))
+	animeId := r.PathValue("animeId")
+	if animeId == "" {
+		http.Error(w, "animeId not specified", http.StatusBadRequest)
+		return
+	}
+	_, err := strconv.Atoi(animeId)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "animeId must be an integer", http.StatusBadRequest)
 		return
 	}
 
-	anime, edges, err := services.GetAnimeGraph(animeId, true)
+	anime, edges, err := services.GetAnimeGraph(animeId, false)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
