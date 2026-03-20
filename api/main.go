@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/braedensmith29/animap/src/server"
+	"github.com/braedensmith29/animap/server"
 	"github.com/joho/godotenv"
 )
 

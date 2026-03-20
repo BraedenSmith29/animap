@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/braedensmith29/animap/src/server/services"
+	"github.com/braedensmith29/animap/server/services"
 )
 
 type FetchGraphResponse struct {
