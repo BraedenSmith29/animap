@@ -1,0 +1,22 @@
+.graph__header {
+    position: relative;
+    margin: 10px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.graph__header-title {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+    margin: 0 0 0.35rem;
+    user-select: none;
+    text-decoration: none;
+}
+
+.graph__header-title span {
+    color: var(--color-accent-primary);
+}

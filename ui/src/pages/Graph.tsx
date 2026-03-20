@@ -1,7 +1,8 @@
+import './Graph.css';
 import { useEffect, useState } from 'react';
 import { AniMapCanvas, AnimeDetailsSidebar } from '../components';
 import type { Anime, GraphResponse } from '../types/graph.ts';
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { SearchBar } from '../components/searchBar/SearchBar.tsx';
 
 export function Graph() {
@@ -38,7 +39,8 @@ export function Graph() {
     useEffect(updateGraph, [animeId]);
 
     return <>
-        <div style={{ position: 'relative', margin: 10, zIndex: 1 }}>
+        <div className="graph__header">
+            <Link to="/" className="graph__header-title">Ani<span>Map</span></Link>
             <SearchBar />
         </div>
         <AniMapCanvas nodes={graph.anime} edges={graph.edges} setSelectedAnime={handleSelectedAnime} />
