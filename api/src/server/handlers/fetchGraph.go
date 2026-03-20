@@ -9,8 +9,7 @@ import (
 )
 
 type FetchGraphResponse struct {
-	Anime []services.Anime `json:"anime"`
-	Edges []services.Edge  `json:"edges"`
+	Graph *services.AniMapGraph `json:"graph"`
 }
 
 func HandleFetchGraph(w http.ResponseWriter, r *http.Request) {
@@ -30,13 +29,13 @@ func HandleFetchGraph(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	anime, edges, err := services.GetAnimeGraph(animeId, false)
+	graph, err := services.GetAnimeGraph(animeId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	response := FetchGraphResponse{Anime: anime, Edges: edges}
+	response := FetchGraphResponse{Graph: graph}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {

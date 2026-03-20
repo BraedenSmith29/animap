@@ -1,13 +1,13 @@
 import './Graph.css';
 import { useEffect, useState } from 'react';
 import { AniMapCanvas, AnimeDetailsSidebar } from '../components';
-import type { Anime, GraphResponse } from '../types/graph.ts';
+import type { Anime, Graph } from '../types/graph.ts';
 import { Link, useParams } from 'react-router';
 import { SearchBar } from '../components/searchBar/SearchBar.tsx';
 
 export function Graph() {
     const { animeId } = useParams();
-    const [graph, setGraph] = useState<GraphResponse>({ anime: [], edges: [] });
+    const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] });
     const [selectedAnime, setSelectedAnime] = useState<Anime | null>(null);
     const [isSidebarClosing, setIsSidebarClosing] = useState(false);
 
@@ -29,9 +29,9 @@ export function Graph() {
         } else {
             fetch(`/api/v1/fetchGraph/${animeId}`)
                 .then(res => res.json())
-                .then((graph) => {
-                    setGraph(graph);
-                    localStorage.setItem(`graph-${animeId}`, JSON.stringify(graph));
+                .then((body) => {
+                    setGraph(body.graph);
+                    localStorage.setItem(`graph-${animeId}`, JSON.stringify(body.graph));
                 });
         }
     }, [animeId]);
@@ -41,7 +41,7 @@ export function Graph() {
             <Link to="/" className="graph__header-title">Ani<span>Map</span></Link>
             <SearchBar />
         </div>
-        <AniMapCanvas nodes={graph.anime} edges={graph.edges} setSelectedAnime={handleSelectedAnime} />
+        <AniMapCanvas graph={graph} setSelectedAnime={handleSelectedAnime} />
         {selectedAnime && (
             <AnimeDetailsSidebar
                 anime={selectedAnime}

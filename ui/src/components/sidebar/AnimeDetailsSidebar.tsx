@@ -56,7 +56,7 @@ const formatRuntime = (seconds?: number) => {
 }
 
 export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Props) {
-    const coverUrl = anime.mainPicture?.large || '';
+    const coverUrl = anime.mainPicture || '';
     const title = anime.title || 'Untitled anime';
     const subtitle = anime.enTitle || anime.jaTitle || 'No alternate title available';
 
@@ -94,7 +94,7 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Pro
 
                 <a
                     className="sidebar__mal-link"
-                    href={`https://myanimelist.net/anime/${anime.id}`}
+                    href={`https://myanimelist.net/anime/${anime.malId}`}
                     target="_blank"
                     rel="noopener noreferrer"
                 >

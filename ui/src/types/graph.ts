@@ -1,13 +1,9 @@
 export interface Anime {
-    id: string;
-    label: string;
+    malId: string;
     title: string;
     enTitle?: string;
     jaTitle?: string;
-    mainPicture?: {
-        medium: string;
-        large?: string;
-    };
+    mainPicture?: string;
     startDate?: string;
     endDate?: string;
     synopsis?: string;
@@ -22,6 +18,23 @@ export interface Anime {
     rating?: 'g' | 'pg' | 'pg_13' | 'r' | 'r+' | 'rx';
 }
 
+export interface BaseNode {
+    id: string;
+    label: string;
+}
+
+export interface AnimeNode extends BaseNode {
+    nodeType: 'anime';
+    anime: Anime;
+}
+
+export interface MangaNode extends BaseNode {
+    nodeType: 'manga';
+    manga: any;
+}
+
+export type Node = AnimeNode | MangaNode;
+
 export interface Edge {
     source: string;
     target: string;
@@ -29,7 +42,7 @@ export interface Edge {
     label: string;
 }
 
-export interface GraphResponse {
-    anime: Anime[];
+export interface Graph {
+    nodes: Node[];
     edges: Edge[];
 }
