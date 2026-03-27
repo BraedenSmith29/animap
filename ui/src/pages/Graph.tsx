@@ -1,54 +1,48 @@
 import './Graph.css';
-import { useEffect, useState } from 'react';
-import { AniMapCanvas, AnimeDetailsSidebar } from '../components';
-import type { Anime, Graph } from '../types/graph.ts';
+import { useState } from 'react';
+import { AniMapCanvas } from '../components';
+import { useJikanGraph } from '../hooks/useJikanGraph.ts';
+import type { Node } from '../types/graph.ts';
 import { Link, useParams } from 'react-router';
 import { SearchBar } from '../components/searchBar/SearchBar.tsx';
+import { DetailsSidebar } from '../components/sidebar/DetailsSidebar.tsx';
 
 export function Graph() {
     const { animeId } = useParams();
-    const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] });
-    const [selectedAnime, setSelectedAnime] = useState<Anime | null>(null);
+    const { graph, loading } = useJikanGraph(animeId);
+    const [selectedNode, setSelectedNode] = useState<Node | null>(null);
     const [isSidebarClosing, setIsSidebarClosing] = useState(false);
 
-    const handleSelectedAnime = (anime: Anime | null) => {
-        if (anime) {
+    const handleSelectedNode = (node: Node | null) => {
+        if (node) {
             setIsSidebarClosing(false);
-            setSelectedAnime(anime);
+            setSelectedNode(node);
             return;
         }
 
-        if (selectedAnime) {
+        if (selectedNode) {
             setIsSidebarClosing(true);
         }
     };
-
-    useEffect(() => {
-        if (localStorage.getItem(`graph-${animeId}`)) {
-            setGraph(JSON.parse(localStorage.getItem(`graph-${animeId}`)!));
-        } else {
-            fetch(`/api/v1/fetchGraph/${animeId}`)
-                .then(res => res.json())
-                .then((body) => {
-                    setGraph(body.graph);
-                    localStorage.setItem(`graph-${animeId}`, JSON.stringify(body.graph));
-                });
-        }
-    }, [animeId]);
 
     return <>
         <div className="graph__header">
             <Link to="/" className="graph__header-title">Ani<span>Map</span></Link>
             <SearchBar />
         </div>
-        <AniMapCanvas graph={graph} setSelectedAnime={handleSelectedAnime} />
-        {selectedAnime && (
-            <AnimeDetailsSidebar
-                anime={selectedAnime}
+        {loading ? (
+            <div className="graph__loading-overlay">
+                <div className="graph__loading-spinner" />
+                <p>Building your anime relationship map...</p>
+            </div>
+        ) : <AniMapCanvas graph={graph} setSelectedNode={handleSelectedNode} />}
+        {selectedNode && (
+            <DetailsSidebar
+                node={selectedNode}
                 isClosing={isSidebarClosing}
-                onClose={() => handleSelectedAnime(null)}
+                onClose={() => handleSelectedNode(null)}
                 onClosed={() => {
-                    setSelectedAnime(null);
+                    setSelectedNode(null);
                     setIsSidebarClosing(false);
                 }}
             />

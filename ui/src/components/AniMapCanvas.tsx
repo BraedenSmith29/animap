@@ -2,14 +2,14 @@ import { useMemo } from 'react';
 import { darkTheme, GraphCanvas } from 'reagraph';
 import type { Theme } from 'reagraph';
 import { GraphNodeIcon } from './GraphNodeIcon.tsx';
-import type { Node, Anime, Graph } from '../types/graph';
+import type { Node, Graph } from '../types/graph';
 
 interface Props {
     graph: Graph;
-    setSelectedAnime: (anime: Anime | null) => void;
+    setSelectedNode: (node: Node | null) => void;
 }
 
-export function AniMapCanvas({ graph, setSelectedAnime }: Props) {
+export function AniMapCanvas({ graph, setSelectedNode }: Props) {
     const graphTheme = useMemo<Theme>(() => {
         if (typeof window === 'undefined') {
             return darkTheme;
@@ -66,17 +66,14 @@ export function AniMapCanvas({ graph, setSelectedAnime }: Props) {
                     const n = node as unknown as Node;
                     if (n.nodeType === 'anime') {
                         return <GraphNodeIcon malUrl={n.anime.mainPicture || ''} />;
+                    } else if (n.nodeType === 'manga') {
+                        return <GraphNodeIcon malUrl={n.manga.mainPicture || ''} />;
                     } else {
                         return null;
                     }
                 }}
-                onNodeClick={(node) => {
-                    const n = node as unknown as Node;
-                    if (n.nodeType === 'anime') {
-                        setSelectedAnime(n.anime);
-                    }
-                }}
-                onCanvasClick={() => setSelectedAnime(null)}
+                onNodeClick={(node) => setSelectedNode(node as unknown as Node)}
+                onCanvasClick={() => setSelectedNode(null)}
             />
         </div>
     );

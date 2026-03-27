@@ -18,6 +18,29 @@ export interface Anime {
     rating?: 'g' | 'pg' | 'pg_13' | 'r' | 'r+' | 'rx';
 }
 
+export interface Manga {
+    malId: string;
+    title: string;
+    enTitle?: string;
+    jaTitle?: string;
+    mainPicture?: string;
+    startDate?: string;
+    endDate?: string;
+    synopsis?: string;
+    meanScore?: number;
+    numListUsers: number;
+    nsfw?: 'white' | 'gray' | 'black';
+    mediaType: 'unknown' | 'manga' | 'novel' | 'one_shot' | 'doujinshi' | 'manhwa' | 'manhua' | 'oel';
+    status: 'finished_airing' | 'currently_publishing' | 'not_yet_published';
+    numVolumes: number;
+    numChapters: number;
+    authors: {
+        firstName: string;
+        lastName: string;
+        role: string;
+    }[]
+}
+
 export interface BaseNode {
     id: string;
     label: string;
@@ -30,7 +53,7 @@ export interface AnimeNode extends BaseNode {
 
 export interface MangaNode extends BaseNode {
     nodeType: 'manga';
-    manga: any;
+    manga: Manga;
 }
 
 export type Node = AnimeNode | MangaNode;

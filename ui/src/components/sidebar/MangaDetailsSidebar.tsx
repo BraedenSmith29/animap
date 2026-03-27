@@ -1,9 +1,9 @@
 import './DetailsSidebar.css';
-import type { Anime } from '../../types/graph.ts';
+import type { Manga } from '../../types/graph.ts';
 import { Icon } from '../Icon.tsx';
 
 type Props = {
-    anime: Anime;
+    manga: Manga;
     isClosing: boolean;
     onClose: () => void;
     onClosed: () => void;
@@ -36,31 +36,13 @@ const formatMonthYear = (value?: string) => {
 
 const formatNumber = (value?: number) => (typeof value === 'number' ? value.toLocaleString() : '-');
 const formatNumericValue = (value?: number) => (typeof value === 'number' && !Number.isNaN(value) ? value : '-');
-const formatRuntime = (seconds?: number) => {
-    if (typeof seconds !== 'number' || Number.isNaN(seconds)) {
-        return 'Unknown';
-    }
 
-    const totalMinutes = seconds / 60;
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = Math.floor(totalMinutes % 60);
-    if (hours > 0 && minutes > 0) {
-        return `${hours}h ${minutes}m`;
-    } else if (hours > 0) {
-        return `${hours}h`;
-    } else if (minutes > 0) {
-        return `${minutes}m`;
-    } else {
-        return 'N/A'
-    }
-}
+export function MangaDetailsSidebar({ manga, isClosing, onClose, onClosed }: Props) {
+    const coverUrl = manga.mainPicture || '';
+    const title = manga.title || 'Untitled anime';
+    const subtitle = manga.enTitle || manga.jaTitle || 'No alternate title available';
 
-export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Props) {
-    const coverUrl = anime.mainPicture || '';
-    const title = anime.title || 'Untitled anime';
-    const subtitle = anime.enTitle || anime.jaTitle || 'No alternate title available';
-
-    const infoChips = [formatEnumValue(anime.source), formatEnumValue(anime.rating), formatEnumValue(anime.nsfw)].filter(
+    const infoChips = [formatEnumValue(manga.nsfw)].filter(
         (chip) => chip !== '-',
     );
 
@@ -94,7 +76,7 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Pro
 
                 <a
                     className="sidebar__mal-link"
-                    href={`https://myanimelist.net/anime/${anime.malId}`}
+                    href={`https://myanimelist.net/manga/${manga.malId}`}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -107,32 +89,31 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Pro
                 <div className="sidebar__stats-grid">
                     <div className="sidebar__stat-card">
                         <span className="sidebar__stat-label">Score</span>
-                        <span className="sidebar__stat-value">{formatNumericValue(anime.meanScore)}</span>
+                        <span className="sidebar__stat-value">{formatNumericValue(manga.meanScore)}</span>
                     </div>
                     <div className="sidebar__stat-card">
                         <span className="sidebar__stat-label">Users</span>
-                        <span className="sidebar__stat-value">{formatNumber(anime.numListUsers)}</span>
+                        <span className="sidebar__stat-value">{formatNumber(manga.numListUsers)}</span>
                     </div>
                     <div className="sidebar__stat-card">
                         <span className="sidebar__stat-label">Type</span>
-                        <span className="sidebar__stat-value">{formatEnumValue(anime.mediaType)}</span>
+                        <span className="sidebar__stat-value">{formatEnumValue(manga.mediaType)}</span>
                     </div>
-                    {anime.numEpisodes > 1 ?
+                    {manga.numVolumes > 1 ?
                         <div className="sidebar__stat-card">
-                            <span className="sidebar__stat-label">Episodes</span>
-                            <span className="sidebar__stat-value">{formatNumericValue(anime.numEpisodes)}</span>
+                            <span className="sidebar__stat-label">Volumes</span>
+                            <span className="sidebar__stat-value">{formatNumericValue(manga.numVolumes)}</span>
                         </div>
                         : <div className="sidebar__stat-card">
-                            <span className="sidebar__stat-label">Runtime</span>
-                            <span
-                                className="sidebar__stat-value">{formatRuntime(anime.averageEpisodeDuration)}</span>
+                            <span className="sidebar__stat-label">Chapters</span>
+                            <span className="sidebar__stat-value">{formatNumericValue(manga.numChapters)}</span>
                         </div>
                     }
                 </div>
 
                 <div className="sidebar__meta-card">
-                    <p>{formatMonthYear(anime.startDate)} - {formatMonthYear(anime.endDate)}</p>
-                    <p>{formatEnumValue(anime.status)}</p>
+                    <p>{formatMonthYear(manga.startDate)} - {formatMonthYear(manga.endDate)}</p>
+                    <p>{formatEnumValue(manga.status)}</p>
                 </div>
 
                 {infoChips.length > 0 && (
@@ -145,7 +126,7 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed }: Pro
                     </div>
                 )}
 
-                <p className="sidebar__synopsis">{anime.synopsis || 'No synopsis available.'}</p>
+                <p className="sidebar__synopsis">{manga.synopsis || 'No synopsis available.'}</p>
 
                 <dl className="sidebar__details">
                 </dl>
