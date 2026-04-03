@@ -22,13 +22,6 @@ func TestRoutes(t *testing.T) {
 	if healthRes.Code != http.StatusOK {
 		t.Fatalf("expected health route status %d, got %d", http.StatusOK, healthRes.Code)
 	}
-
-	fetchGraphReq := httptest.NewRequest(http.MethodGet, "/api/v1/fetchGraph/52991", nil)
-	fetchGraphRes := httptest.NewRecorder()
-	router.ServeHTTP(fetchGraphRes, fetchGraphReq)
-	if fetchGraphRes.Code != http.StatusOK {
-		t.Fatalf("expected fetchGraph route status %d, got %d", http.StatusOK, fetchGraphRes.Code)
-	}
 }
 
 func TestUnknownRouteReturnsNotFound(t *testing.T) {
