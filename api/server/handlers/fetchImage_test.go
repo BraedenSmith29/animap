@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	serverHandlers "github.com/braedensmith29/animap/src/server/handlers"
 )
 
 func TestHandleFetchImageValidation(t *testing.T) {
@@ -55,7 +53,7 @@ func TestHandleFetchImageValidation(t *testing.T) {
 			req := httptest.NewRequest(tc.method, tc.target, nil)
 			res := httptest.NewRecorder()
 
-			serverHandlers.HandleFetchImage(res, req)
+			HandleFetchImage(res, req)
 
 			if res.Code != tc.statusCode {
 				t.Fatalf("expected status %d, got %d", tc.statusCode, res.Code)
@@ -81,7 +79,7 @@ func TestHandleFetchImageRejectsNonImageContent(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/fetchImage?imageUrl=http://myanimelist.net/poster.jpg", nil)
 	res := httptest.NewRecorder()
 
-	serverHandlers.HandleFetchImage(res, req)
+	HandleFetchImage(res, req)
 
 	if res.Code != http.StatusBadGateway {
 		t.Fatalf("expected status %d, got %d", http.StatusBadGateway, res.Code)
@@ -105,7 +103,7 @@ func TestHandleFetchImageReturnsImageFromAllowedSubdomain(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/fetchImage?imageUrl=http://cdn.myanimelist.net/poster.png", nil)
 	res := httptest.NewRecorder()
 
-	serverHandlers.HandleFetchImage(res, req)
+	HandleFetchImage(res, req)
 
 	if res.Code != http.StatusOK {
 		t.Fatalf("expected status %d, got %d", http.StatusOK, res.Code)

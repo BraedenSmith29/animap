@@ -2,15 +2,14 @@ import { useMemo } from 'react';
 import { darkTheme, GraphCanvas } from 'reagraph';
 import type { Theme } from 'reagraph';
 import { GraphNodeIcon } from './GraphNodeIcon.tsx';
-import type { Anime, Edge } from '../types/graph';
+import type { Node, Graph } from '../types/graph';
 
 interface Props {
-    nodes: Anime[];
-    edges: Edge[];
-    setSelectedAnime: (anime: Anime | null) => void;
+    graph: Graph;
+    setSelectedNode: (node: Node | null) => void;
 }
 
-export function AniMapCanvas({ nodes, edges, setSelectedAnime }: Props) {
+export function AniMapCanvas({ graph, setSelectedNode }: Props) {
     const graphTheme = useMemo<Theme>(() => {
         if (typeof window === 'undefined') {
             return darkTheme;
@@ -57,17 +56,24 @@ export function AniMapCanvas({ nodes, edges, setSelectedAnime }: Props) {
     return (
         <div>
             <GraphCanvas
-                nodes={nodes}
-                edges={edges}
+                nodes={graph.nodes}
+                edges={graph.edges}
                 theme={graphTheme}
                 labelType="all"
                 draggable={true}
                 layoutType="treeLr2d"
                 renderNode={({ node }) => {
-                    return <GraphNodeIcon malUrl={(node as unknown as Anime).mainPicture?.large || ''} />;
+                    const n = node as unknown as Node;
+                    if (n.nodeType === 'anime') {
+                        return <GraphNodeIcon malUrl={n.anime.nodeImage || ''} />;
+                    } else if (n.nodeType === 'manga') {
+                        return <GraphNodeIcon malUrl={n.manga.nodeImage || ''} />;
+                    } else {
+                        return null;
+                    }
                 }}
-                onNodeClick={(node) => setSelectedAnime(node as unknown as Anime)}
-                onCanvasClick={() => setSelectedAnime(null)}
+                onNodeClick={(node) => setSelectedNode(node as unknown as Node)}
+                onCanvasClick={() => setSelectedNode(null)}
             />
         </div>
     );

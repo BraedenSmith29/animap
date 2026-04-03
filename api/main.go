@@ -4,17 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/braedensmith29/animap/src/server"
-	"github.com/joho/godotenv"
+	"github.com/braedensmith29/animap/server"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println(err)
-		log.Fatal("Error loading .env file. Ensure you are running from /api.")
-	}
-
 	router := server.NewRouter()
 
 	log.Println("API server listening on :8080")
