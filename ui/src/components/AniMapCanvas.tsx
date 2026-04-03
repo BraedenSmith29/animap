@@ -65,9 +65,9 @@ export function AniMapCanvas({ graph, setSelectedNode }: Props) {
                 renderNode={({ node }) => {
                     const n = node as unknown as Node;
                     if (n.nodeType === 'anime') {
-                        return <GraphNodeIcon malUrl={n.anime.mainPicture || ''} />;
+                        return <GraphNodeIcon malUrl={n.anime.nodeImage || ''} />;
                     } else if (n.nodeType === 'manga') {
-                        return <GraphNodeIcon malUrl={n.manga.mainPicture || ''} />;
+                        return <GraphNodeIcon malUrl={n.manga.nodeImage || ''} />;
                     } else {
                         return null;
                     }

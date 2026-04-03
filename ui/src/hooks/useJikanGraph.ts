@@ -1,6 +1,61 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Graph } from '../types/graph.ts';
 import { useJikanClient } from './useJikanClient.ts';
+import type { Anime, JikanImages, JikanResourceTitle, Manga } from '@tutkli/jikan-ts/types';
+
+const NSFW_GENRES = [9, 12, 49];
+
+function getPortraitImage(images: JikanImages): string | null {
+    return images.webp?.maximum_image_url
+        ?? images.jpg?.maximum_image_url
+        ?? images.webp?.large_image_url
+        ?? images.jpg?.large_image_url
+        ?? images.webp?.medium_image_url
+        ?? images.jpg?.medium_image_url
+        ?? images.webp?.image_url
+        ?? images.jpg?.image_url
+        ?? images.webp?.small_image_url
+        ?? images.jpg?.small_image_url;
+}
+
+function getNodeImage(images: JikanImages): string | null {
+    return images.webp?.medium_image_url
+        ?? images.jpg?.medium_image_url
+        ?? images.webp?.large_image_url
+        ?? images.jpg?.large_image_url
+        ?? images.webp?.maximum_image_url
+        ?? images.jpg?.maximum_image_url
+        ?? images.webp?.image_url
+        ?? images.jpg?.image_url
+        ?? images.webp?.small_image_url
+        ?? images.jpg?.small_image_url;
+}
+
+function getTitle(titles: JikanResourceTitle[]): string | null {
+    return titles.find(t => t.type === 'Default')?.title ?? null;
+}
+
+function getEnglishTitle(titles: JikanResourceTitle[]): string | null {
+    return titles.find(t => t.type === 'English')?.title ?? null;
+}
+
+function getJapaneseTitle(titles: JikanResourceTitle[]): string | null {
+    return titles.find(t => t.type === 'Japanese')?.title ?? null;
+}
+
+function isNsfw(item: Anime | Manga): boolean {
+    return item.genres.find(g => NSFW_GENRES.includes(g.mal_id)) !== undefined;
+}
+
+function getDurationMinutes(duration: string | null): number | null {
+    if (!duration || duration === 'Unknown') return null;
+    const hrMatch = duration.match(/(\d+) hr/);
+    const minMatch = duration.match(/(\d+) min/);
+    if (!hrMatch && !minMatch) return null;
+    const hours = hrMatch ? parseInt(hrMatch[1], 10) : 0;
+    const minutes = minMatch ? parseInt(minMatch[1], 10) : 0;
+    return hours * 60 + minutes;
+}
 
 export function useJikanGraph(sourceId: string | undefined) {
     const jikanClient = useJikanClient();
@@ -18,56 +73,80 @@ export function useJikanGraph(sourceId: string | undefined) {
             if (!nextItem) continue;
             const { type, id: currentId } = nextItem;
 
-            const item = await jikanClient.getDetails(type, currentId, signal);
-            if (!item) continue;
-
+            let item: Anime | Manga;
             if (type === 'anime') {
+                item = await jikanClient.getDetails(type, currentId, signal) as Anime;
+                if (!item) continue;
                 newGraph.nodes.push({
                     id: 'anime' + currentId,
-                    label: item.title,
+                    label: getTitle(item.titles) ?? 'Unknown Anime',
                     nodeType: 'anime',
                     anime: {
-                        malId: item.mal_id,
-                        title: item.title,
-                        mainPicture: item.images.webp.large_image_url,
-                        numListUsers: item.members,
+                        malId: item.mal_id.toString(),
+                        title: getTitle(item.titles),
+                        enTitle: getEnglishTitle(item.titles),
+                        jaTitle: getJapaneseTitle(item.titles),
+                        portraitImage: getPortraitImage(item.images),
+                        nodeImage: getNodeImage(item.images),
+                        startDate: item.aired.from,
+                        endDate: item.aired.to,
+                        synopsis: item.synopsis,
+                        score: item.score,
+                        members: item.members,
+                        nsfw: isNsfw(item),
                         mediaType: item.type,
                         status: item.status,
-                        numEpisodes: item.episodes,
+                        episodes: item.episodes,
+                        source: item.source,
+                        duration: getDurationMinutes(item.duration),
+                        rating: item.rating ?? null,
                     },
                 });
             } else if (type === 'manga') {
+                item = await jikanClient.getDetails(type, currentId, signal) as Manga;
+                if (!item) continue;
                 newGraph.nodes.push({
                     id: 'manga' + currentId,
-                    label: item.title,
+                    label: getTitle(item.titles) ?? 'Unknown Manga',
                     nodeType: 'manga',
                     manga: {
-                        malId: item.mal_id,
-                        title: item.title,
-                        numListUsers: item.members,
+                        malId: item.mal_id.toString(),
+                        title: getTitle(item.titles),
+                        enTitle: getEnglishTitle(item.titles),
+                        jaTitle: getJapaneseTitle(item.titles),
+                        portraitImage: getPortraitImage(item.images),
+                        nodeImage: getNodeImage(item.images),
+                        startDate: item.published.from,
+                        endDate: item.published.to,
+                        synopsis: item.synopsis,
+                        score: item.score,
+                        members: item.members,
+                        nsfw: isNsfw(item),
                         mediaType: item.type,
                         status: item.status,
-                        numVolumes: item.volumes,
-                        numChapters: item.chapters,
-                        authors: [],
+                        volumes: item.volumes,
+                        chapters: item.chapters,
                     },
                 });
             } else {
                 continue;
             }
 
-            for (const relation of item.relations) {
-                const relationType = relation.relation;
-                for (const entry of relation.entry) {
-                    newGraph.edges.push({
-                        source: type + currentId,
-                        target: entry.type + entry.mal_id,
-                        label: relationType,
-                        id: `${type}${currentId}-${entry.type}${entry.mal_id}`,
-                    });
-                    if (!alreadyQueued.has(entry.type + entry.mal_id) && entry.type === 'anime') {
-                        alreadyQueued.add(entry.type + entry.mal_id);
-                        queue.push({ type: entry.type, id: entry.mal_id });
+            if (item.relations) {
+                for (const relation of item.relations) {
+                    const relationType = relation.relation;
+                    for (const entry of relation.entry) {
+                        if (entry.type !== 'anime' && entry.type !== 'manga') continue;
+                        newGraph.edges.push({
+                            source: type + currentId,
+                            target: entry.type + entry.mal_id,
+                            label: relationType,
+                            id: `${type}${currentId}-${entry.type}${entry.mal_id}`,
+                        });
+                        if (!alreadyQueued.has(entry.type + entry.mal_id)) {
+                            alreadyQueued.add(entry.type + entry.mal_id);
+                            queue.push({ type: entry.type, id: entry.mal_id.toString() });
+                        }
                     }
                 }
             }
@@ -88,19 +167,9 @@ export function useJikanGraph(sourceId: string | undefined) {
         fetchJikanGraph(sourceId, controller.signal)
             .then((graph) => {
                 if (graph) {
-                    setGraph(graph)
+                    setGraph(graph);
                 }
-            })
-            .catch((error) => {
-                if (error instanceof Error && error.name === 'AbortError') {
-                    return;
-                }
-                console.error('Failed to fetch graph:', error);
-            })
-            .finally(() => {
-                if (!controller.signal.aborted) {
-                    setLoading(false);
-                }
+                setLoading(false);
             });
 
         return () => {

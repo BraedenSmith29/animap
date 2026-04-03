@@ -1,4 +1,5 @@
 import { useCallback, useRef } from 'react';
+import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 
 interface QueueItem {
     resolve: (value?: any) => void;
@@ -34,11 +35,16 @@ export function useJikanClient() {
             }
             startRunner();
         });
-    }, [startRunner])
+    }, [startRunner]);
 
     const getDetails = useCallback(
         (type: string, currentId: string, signal: AbortSignal) => {
-            return new Promise<any>(async (resolve, reject) => {
+            return new Promise<Anime | Manga | null>(async (resolve, reject) => {
+                const cachedData = localStorage.getItem(`animap:${type}:${currentId}`);
+                if (cachedData) {
+                    resolve(JSON.parse(cachedData));
+                    return;
+                }
                 await addToQueue(signal, false);
                 while (true) {
                     try {
@@ -56,6 +62,7 @@ export function useJikanClient() {
                             reject(response.statusText);
                         } else {
                             const body = await response.json();
+                            localStorage.setItem(`animap:${type}:${currentId}`, JSON.stringify(body.data));
                             resolve(body.data);
                         }
                     } catch (error) {

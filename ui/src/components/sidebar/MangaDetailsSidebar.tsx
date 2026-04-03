@@ -9,7 +9,7 @@ type Props = {
     onClosed: () => void;
 };
 
-const formatEnumValue = (value?: string) => {
+const formatEnumValue = (value?: string | null) => {
     if (!value) {
         return '-';
     }
@@ -21,7 +21,7 @@ const formatEnumValue = (value?: string) => {
         .join(' ');
 };
 
-const formatMonthYear = (value?: string) => {
+const formatMonthYear = (value?: string | null) => {
     if (!value) {
         return '-';
     }
@@ -34,16 +34,18 @@ const formatMonthYear = (value?: string) => {
     return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(parsedDate);
 };
 
-const formatNumber = (value?: number) => (typeof value === 'number' ? value.toLocaleString() : '-');
-const formatNumericValue = (value?: number) => (typeof value === 'number' && !Number.isNaN(value) ? value : '-');
+const formatNumber = (value?: number | null) => (typeof value === 'number' ? value.toLocaleString() : '-');
+const formatNumericValue = (value?: number | null) => (typeof value === 'number' && !Number.isNaN(value) ? value : '-');
 
 export function MangaDetailsSidebar({ manga, isClosing, onClose, onClosed }: Props) {
-    const coverUrl = manga.mainPicture || '';
-    const title = manga.title || 'Untitled anime';
+    const coverUrl = manga.portraitImage || '';
+    const title = manga.title || 'Untitled Manga';
     const subtitle = manga.enTitle || manga.jaTitle || 'No alternate title available';
 
-    const infoChips = [formatEnumValue(manga.nsfw)].filter(
-        (chip) => chip !== '-',
+    const infoChips = [
+        manga.nsfw ? 'NSFW' : null,
+    ].filter(
+        (chip): chip is string => !!chip,
     );
 
     return (
@@ -89,24 +91,24 @@ export function MangaDetailsSidebar({ manga, isClosing, onClose, onClosed }: Pro
                 <div className="sidebar__stats-grid">
                     <div className="sidebar__stat-card">
                         <span className="sidebar__stat-label">Score</span>
-                        <span className="sidebar__stat-value">{formatNumericValue(manga.meanScore)}</span>
+                        <span className="sidebar__stat-value">{formatNumericValue(manga.score)}</span>
                     </div>
                     <div className="sidebar__stat-card">
                         <span className="sidebar__stat-label">Users</span>
-                        <span className="sidebar__stat-value">{formatNumber(manga.numListUsers)}</span>
+                        <span className="sidebar__stat-value">{formatNumber(manga.members)}</span>
                     </div>
                     <div className="sidebar__stat-card">
                         <span className="sidebar__stat-label">Type</span>
                         <span className="sidebar__stat-value">{formatEnumValue(manga.mediaType)}</span>
                     </div>
-                    {manga.numVolumes > 1 ?
+                    {manga.volumes && manga.volumes > 1 ?
                         <div className="sidebar__stat-card">
                             <span className="sidebar__stat-label">Volumes</span>
-                            <span className="sidebar__stat-value">{formatNumericValue(manga.numVolumes)}</span>
+                            <span className="sidebar__stat-value">{formatNumericValue(manga.volumes)}</span>
                         </div>
                         : <div className="sidebar__stat-card">
                             <span className="sidebar__stat-label">Chapters</span>
-                            <span className="sidebar__stat-value">{formatNumericValue(manga.numChapters)}</span>
+                            <span className="sidebar__stat-value">{formatNumericValue(manga.chapters)}</span>
                         </div>
                     }
                 </div>
