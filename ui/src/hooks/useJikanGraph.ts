@@ -137,14 +137,18 @@ export function useJikanGraph(sourceId: string | undefined) {
                     const relationType = relation.relation;
                     for (const entry of relation.entry) {
                         if (entry.type !== 'anime' && entry.type !== 'manga') continue;
+                        const sourceId = type + currentId;
+                        const targetId = entry.type + entry.mal_id;
+                        const edgeId = `${sourceId}-${targetId}`;
+                        if (newGraph.edges.find((e) => e.id === edgeId)) continue;
                         newGraph.edges.push({
-                            source: type + currentId,
-                            target: entry.type + entry.mal_id,
+                            source: sourceId,
+                            target: targetId,
                             label: relationType,
-                            id: `${type}${currentId}-${entry.type}${entry.mal_id}`,
+                            id: edgeId,
                         });
-                        if (!alreadyQueued.has(entry.type + entry.mal_id)) {
-                            alreadyQueued.add(entry.type + entry.mal_id);
+                        if (!alreadyQueued.has(targetId)) {
+                            alreadyQueued.add(targetId);
                             queue.push({ type: entry.type, id: entry.mal_id.toString() });
                         }
                     }
