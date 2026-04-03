@@ -168,8 +168,8 @@ export function useJikanGraph(sourceId: string | undefined) {
             .then((graph) => {
                 if (graph) {
                     setGraph(graph);
+                    setLoading(false);
                 }
-                setLoading(false);
             });
 
         return () => {
