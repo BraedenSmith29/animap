@@ -42,8 +42,11 @@ export function useJikanClient() {
             return new Promise<Anime | Manga | null>(async (resolve, reject) => {
                 const cachedData = localStorage.getItem(`animap:${type}:${currentId}`);
                 if (cachedData) {
-                    resolve(JSON.parse(cachedData));
-                    return;
+                    const parsedData = JSON.parse(cachedData);
+                    if (parsedData.expiration && parsedData.expiration > Date.now()) {
+                        resolve(parsedData.data);
+                        return;
+                    }
                 }
                 await addToQueue(signal, false);
                 while (true) {
@@ -62,7 +65,10 @@ export function useJikanClient() {
                             reject(response.statusText);
                         } else {
                             const body = await response.json();
-                            localStorage.setItem(`animap:${type}:${currentId}`, JSON.stringify(body.data));
+                            localStorage.setItem(`animap:${type}:${currentId}`, JSON.stringify({
+                                expiration: Date.now() + 1000 * 60 * 60 * 24,
+                                data: body.data,
+                            }));
                             resolve(body.data);
                         }
                     } catch (error) {
