@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
+import { cacheGet, cacheSet, clearExpired } from '../utils/jikanCache';
 
 interface QueueItem {
     resolve: (value?: any) => void;
@@ -13,6 +14,8 @@ export function useJikanClient() {
     const startRunner = useCallback(async () => {
         if (processing.current) return;
         processing.current = true;
+
+        await clearExpired();
 
         let nextRequest = queue.current.shift();
         while (nextRequest) {
@@ -40,11 +43,11 @@ export function useJikanClient() {
     const getDetails = useCallback(
         (type: string, currentId: string, signal: AbortSignal) => {
             return new Promise<Anime | Manga | null>(async (resolve, reject) => {
-                const cachedData = localStorage.getItem(`animap:${type}:${currentId}`);
+                const key = `animap:${type}:${currentId}`;
+                const cachedData = await cacheGet(key);
                 if (cachedData) {
-                    const parsedData = JSON.parse(cachedData);
-                    if (parsedData.expiration && parsedData.expiration > Date.now()) {
-                        resolve(parsedData.data);
+                    if (cachedData.expiration && cachedData.expiration > Date.now()) {
+                        resolve(cachedData.data);
                         return;
                     }
                 }
@@ -65,10 +68,10 @@ export function useJikanClient() {
                             reject(response.statusText);
                         } else {
                             const body = await response.json();
-                            localStorage.setItem(`animap:${type}:${currentId}`, JSON.stringify({
-                                expiration: Date.now() + 1000 * 60 * 60 * 24,
+                            await cacheSet(key, {
+                                expiration: Date.now() + 1000 * 60 * 60 * 24 * 7,
                                 data: body.data,
-                            }));
+                            });
                             resolve(body.data);
                         }
                     } catch (error) {
