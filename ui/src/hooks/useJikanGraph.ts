@@ -127,6 +127,10 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             .then((graph) => {
                 if (graph) {
                     setGraph(graph);
+                }
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) {
                     setLoading(false);
                 }
             });
