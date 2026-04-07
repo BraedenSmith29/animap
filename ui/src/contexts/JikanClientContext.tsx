@@ -49,85 +49,80 @@ export function JikanClientProvider({ children }: { children: ReactNode }) {
     }, [startRunner]);
 
     const getDetails = useCallback(
-        (type: string, currentId: string, signal: AbortSignal) => {
-            return new Promise<Anime | Manga | null>(async (resolve, reject) => {
-                const key = `animap:${type}:${currentId}`;
-                const cachedData = await cacheGet(key);
-                if (cachedData) {
-                    if (cachedData.expiration && cachedData.expiration > Date.now()) {
-                        resolve(cachedData.data);
-                        return;
+        async (type: string, currentId: string, signal: AbortSignal) => {
+            const key = `animap:${type}:${currentId}`;
+            const cachedData = await cacheGet(key);
+            if (cachedData) {
+                if (cachedData.expiration && cachedData.expiration > Date.now()) {
+                    return cachedData.data;
+                }
+            }
+            await addToQueue(signal, false);
+            while (true) {
+                let response;
+                try {
+                    response = await fetch(
+                        `https://api.jikan.moe/v4/${type}/${currentId}/full`,
+                        { signal },
+                    );
+                } catch (error) {
+                    if (error instanceof Error && error.name === 'AbortError') {
+                        return null;
+                    } else {
+                        throw error;
                     }
                 }
-                await addToQueue(signal, false);
-                while (true) {
-                    try {
-                        const response = await fetch(
-                            `https://api.jikan.moe/v4/${type}/${currentId}/full`,
-                            { signal },
-                        );
 
-                        if (response.status === 429) {
-                            await addToQueue(signal, true);
-                            continue;
-                        }
-
-                        if (!response.ok) {
-                            reject(response.statusText);
-                        } else {
-                            const body = await response.json();
-                            await cacheSet(key, {
-                                expiration: Date.now() + 1000 * 60 * 60 * 24 * 7,
-                                data: body.data,
-                            });
-                            resolve(body.data);
-                        }
-                    } catch (error) {
-                        if (error instanceof Error && error.name === 'AbortError') {
-                            resolve(null);
-                        } else {
-                            reject(error);
-                        }
-                    }
-                    return;
+                if (response.status === 429) {
+                    await addToQueue(signal, true);
+                    continue;
                 }
-            });
+
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                } else {
+                    const body = await response.json();
+                    await cacheSet(key, {
+                        expiration: Date.now() + 1000 * 60 * 60 * 24 * 7,
+                        data: body.data,
+                    });
+                    return body.data;
+                }
+            }
         },
         [addToQueue],
     );
 
     const search = useCallback(
-        (type: string, query: string, signal: AbortSignal) => {
-            return new Promise<Anime[] | Manga[] | null>(async (resolve, reject) => {
-                await addToQueue(signal, true);
-                while (true) {
-                    try {
-                        const response = await fetch(
-                            `https://api.jikan.moe/v4/${type}?q=${encodeURIComponent(query)}&limit=3`,
-                            { signal },
-                        );
-
-                        if (response.status === 429) {
-                            await addToQueue(signal, true);
-                            continue;
-                        }
-
-                        if (!response.ok) {
-                            reject(response.statusText);
-                        } else {
-                            const body = await response.json();
-                            resolve(body.data);
-                        }
-                    } catch (error) {
-                        if (error instanceof Error && error.name === 'AbortError') {
-                            resolve(null);
-                        } else {
-                            reject(error);
-                        }
+        async (type: string, query: string, signal: AbortSignal) => {
+            await addToQueue(signal, true);
+            while (true) {
+                let response;
+                try {
+                    response = await fetch(
+                        `https://api.jikan.moe/v4/${type}?q=${encodeURIComponent(query)}&limit=3`,
+                        { signal },
+                    );
+                } catch (error) {
+                    if (error instanceof Error && error.name === 'AbortError') {
+                        return null;
+                    } else {
+                        throw error;
                     }
-                    return;
                 }
-            });
+
+                if (response.status === 429) {
+                    await addToQueue(signal, true);
+                    continue;
+                }
+
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                } else {
+                    const body = await response.json();
+                    return body.data as Anime[] | Manga[];
+                }
+            }
         },
         [addToQueue],
     );
