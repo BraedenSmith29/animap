@@ -1,4 +1,5 @@
-import { useCallback, useRef } from 'react';
+import { createContext, useCallback, useContext, useRef } from 'react';
+import type { ReactNode } from 'react';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { cacheGet, cacheSet, clearExpired } from '../utils/jikanCache';
 
@@ -7,7 +8,14 @@ interface QueueItem {
     signal: AbortSignal;
 }
 
-export function useJikanClient() {
+interface JikanClientContextType {
+    getDetails: (type: string, currentId: string, signal: AbortSignal) => Promise<Anime | Manga | null>;
+    search: (type: string, query: string, signal: AbortSignal) => Promise<Anime[] | Manga[] | null>;
+}
+
+const JikanClientContext = createContext<JikanClientContextType | null>(null);
+
+export function JikanClientProvider({ children }: { children: ReactNode }) {
     const processing = useRef(false);
     const queue = useRef<QueueItem[]>([]);
 
@@ -88,5 +96,53 @@ export function useJikanClient() {
         [addToQueue],
     );
 
-    return { getDetails };
+    const search = useCallback(
+        (type: string, query: string, signal: AbortSignal) => {
+            return new Promise<Anime[] | Manga[] | null>(async (resolve, reject) => {
+                await addToQueue(signal, true);
+                while (true) {
+                    try {
+                        const response = await fetch(
+                            `https://api.jikan.moe/v4/${type}?q=${encodeURIComponent(query)}&limit=3`,
+                            { signal },
+                        );
+
+                        if (response.status === 429) {
+                            await addToQueue(signal, true);
+                            continue;
+                        }
+
+                        if (!response.ok) {
+                            reject(response.statusText);
+                        } else {
+                            const body = await response.json();
+                            resolve(body.data);
+                        }
+                    } catch (error) {
+                        if (error instanceof Error && error.name === 'AbortError') {
+                            resolve(null);
+                        } else {
+                            reject(error);
+                        }
+                    }
+                    return;
+                }
+            });
+        },
+        [addToQueue],
+    );
+
+    return (
+        <JikanClientContext.Provider value={{ getDetails, search }}>
+            {children}
+        </JikanClientContext.Provider>
+    );
+}
+
+export function useJikanClientContext() {
+    const context = useContext(JikanClientContext);
+    if (!context) {
+        throw new Error('useJikanClientContext must be used within a JikanClientProvider');
+    }
+    return context;
 }
