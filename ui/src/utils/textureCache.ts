@@ -2,6 +2,10 @@ import * as THREE from 'three';
 
 const cache = new Map<string, Promise<THREE.Texture | null>>();
 
+export function clearTextureCache() {
+    cache.clear();
+}
+
 export async function loadTexture(id: string, url: string): Promise<THREE.Texture | null> {
     if (cache.has(id)) return cache.get(id)!;
 
@@ -27,21 +31,19 @@ function processTexture(texture: THREE.Texture) {
         return null;
     }
 
-    const processedTexture = texture.clone();
-
     // Center-crop UVs to a square, so the circle diameter uses min(width, height).
     const aspectRatio = image.width / image.height;
     if (aspectRatio > 1) {
-        processedTexture.repeat.set(1 / aspectRatio, 1);
-        processedTexture.offset.set((1 - 1 / aspectRatio) / 2, 0);
+        texture.repeat.set(1 / aspectRatio, 1);
+        texture.offset.set((1 - 1 / aspectRatio) / 2, 0);
     } else {
-        processedTexture.repeat.set(1, aspectRatio);
-        processedTexture.offset.set(0, (1 - aspectRatio) / 2);
+        texture.repeat.set(1, aspectRatio);
+        texture.offset.set(0, (1 - aspectRatio) / 2);
     }
 
-    processedTexture.wrapS = THREE.ClampToEdgeWrapping;
-    processedTexture.wrapT = THREE.ClampToEdgeWrapping;
-    processedTexture.needsUpdate = true;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.needsUpdate = true;
 
-    return processedTexture;
+    return texture;
 }

@@ -3,7 +3,7 @@ import type { Graph, MediaType, Node } from '../types/graph.ts';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { useJikanClientContext } from '../contexts/JikanClientContext.tsx';
 import { createAnimeNode, createMangaNode } from '../utils/jikanProcessing.ts';
-import { loadTexture } from '../utils/textureCache.ts';
+import { clearTextureCache, loadTexture } from '../utils/textureCache.ts';
 
 export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
     const jikanClient = useJikanClientContext();
@@ -36,7 +36,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
 
             const nodeImage = newNode.nodeType === 'anime' ? newNode.anime.nodeImage : newNode.manga.nodeImage;
             if (nodeImage) {
-                void loadTexture(item.mal_id.toString(), nodeImage);
+                void loadTexture(newNode.id, nodeImage);
             }
 
             if (item.relations) {
@@ -73,6 +73,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
 
         setLoading(true);
         setGraph({ nodes: [], edges: [] });
+        clearTextureCache();
 
         const controller = new AbortController();
         fetchJikanGraph(sourceType, sourceId, controller.signal)
