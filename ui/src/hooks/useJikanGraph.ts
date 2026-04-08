@@ -2,15 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Graph, MediaType } from '../types/graph.ts';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { useJikanClientContext } from '../contexts/JikanClientContext.tsx';
-import {
-    getDurationMinutes,
-    getEnglishTitle,
-    getJapaneseTitle,
-    getNodeImage,
-    getPortraitImage,
-    getTitle,
-    isNsfw,
-} from '../utils/jikanProcessing.ts';
+import { createAnimeNode, createMangaNode } from '../utils/jikanProcessing.ts';
 
 export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
     const jikanClient = useJikanClientContext();
@@ -28,61 +20,13 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             if (!nextItem) continue;
             const { type, id: currentId } = nextItem;
 
-            let item: Anime | Manga;
+            const item = await jikanClient.getDetails(type, currentId, signal);
+            if (!item) continue;
+
             if (type === 'anime') {
-                item = await jikanClient.getDetails(type, currentId, signal) as Anime;
-                if (!item) continue;
-                newGraph.nodes.push({
-                    id: 'anime' + currentId,
-                    label: getTitle(item.titles) ?? 'Unknown Anime',
-                    nodeType: 'anime',
-                    anime: {
-                        malId: item.mal_id.toString(),
-                        title: getTitle(item.titles),
-                        enTitle: getEnglishTitle(item.titles),
-                        jaTitle: getJapaneseTitle(item.titles),
-                        portraitImage: getPortraitImage(item.images),
-                        nodeImage: getNodeImage(item.images),
-                        startDate: item.aired.from,
-                        endDate: item.aired.to,
-                        synopsis: item.synopsis,
-                        score: item.score,
-                        members: item.members,
-                        nsfw: isNsfw(item),
-                        mediaType: item.type,
-                        status: item.status,
-                        episodes: item.episodes,
-                        source: item.source,
-                        duration: getDurationMinutes(item.duration),
-                        rating: item.rating ?? null,
-                    },
-                });
+                newGraph.nodes.push(createAnimeNode(item as Anime));
             } else if (type === 'manga') {
-                item = await jikanClient.getDetails(type, currentId, signal) as Manga;
-                if (!item) continue;
-                newGraph.nodes.push({
-                    id: 'manga' + currentId,
-                    label: getTitle(item.titles) ?? 'Unknown Manga',
-                    nodeType: 'manga',
-                    manga: {
-                        malId: item.mal_id.toString(),
-                        title: getTitle(item.titles),
-                        enTitle: getEnglishTitle(item.titles),
-                        jaTitle: getJapaneseTitle(item.titles),
-                        portraitImage: getPortraitImage(item.images),
-                        nodeImage: getNodeImage(item.images),
-                        startDate: item.published.from,
-                        endDate: item.published.to,
-                        synopsis: item.synopsis,
-                        score: item.score,
-                        members: item.members,
-                        nsfw: isNsfw(item),
-                        mediaType: item.type,
-                        status: item.status,
-                        volumes: item.volumes,
-                        chapters: item.chapters,
-                    },
-                });
+                newGraph.nodes.push(createMangaNode(item as Manga));
             } else {
                 continue;
             }
