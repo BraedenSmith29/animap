@@ -38,23 +38,29 @@ export function SearchBar() {
                     jikanClient.search('manga', q, abortController.signal),
                 ]);
 
-                const animeResults: SearchResult[] = (animeData || []).map((item) => ({
-                    id: item.mal_id,
-                    title: getTitle(item.titles),
-                    enTitle: getEnglishTitle(item.titles),
-                    jaTitle: getJapaneseTitle(item.titles),
-                    portraitImage: getPortraitImage(item.images),
-                    type: 'anime',
-                }));
+                const animeResults: SearchResult[] =
+                    (animeData || []).filter((r1, i, self) => {
+                        return self.findIndex((r2) => r2.mal_id === r1.mal_id) === i;
+                    }).map((item) => ({
+                        id: item.mal_id,
+                        title: getTitle(item.titles),
+                        enTitle: getEnglishTitle(item.titles),
+                        jaTitle: getJapaneseTitle(item.titles),
+                        portraitImage: getPortraitImage(item.images),
+                        type: 'anime',
+                    }));
 
-                const mangaResults: SearchResult[] = (mangaData || []).map((item) => ({
-                    id: item.mal_id,
-                    title: getTitle(item.titles),
-                    enTitle: getEnglishTitle(item.titles),
-                    jaTitle: getJapaneseTitle(item.titles),
-                    portraitImage: getPortraitImage(item.images),
-                    type: 'manga',
-                }));
+                const mangaResults: SearchResult[] =
+                    (mangaData || []).filter((r1, i, self) => {
+                        return self.findIndex((r2) => r2.mal_id === r1.mal_id) === i;
+                    }).map((item) => ({
+                        id: item.mal_id,
+                        title: getTitle(item.titles),
+                        enTitle: getEnglishTitle(item.titles),
+                        jaTitle: getJapaneseTitle(item.titles),
+                        portraitImage: getPortraitImage(item.images),
+                        type: 'manga',
+                    }));
 
                 const combinedResults = [...animeResults, ...mangaResults];
                 setResults(combinedResults);
