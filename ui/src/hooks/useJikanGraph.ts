@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Graph, MediaType } from '../types/graph.ts';
+import type { Graph, MediaType, Node } from '../types/graph.ts';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { useJikanClientContext } from '../contexts/JikanClientContext.tsx';
 import { createAnimeNode, createMangaNode } from '../utils/jikanProcessing.ts';
+import { loadTexture } from '../utils/textureCache.ts';
 
 export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
     const jikanClient = useJikanClientContext();
@@ -23,12 +24,19 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             const item = await jikanClient.getDetails(type, currentId, signal);
             if (!item) continue;
 
+            let newNode: Node;
             if (type === 'anime') {
-                newGraph.nodes.push(createAnimeNode(item as Anime));
+                newNode = createAnimeNode(item as Anime);
             } else if (type === 'manga') {
-                newGraph.nodes.push(createMangaNode(item as Manga));
+                newNode = createMangaNode(item as Manga);
             } else {
                 continue;
+            }
+            newGraph.nodes.push(newNode);
+
+            const nodeImage = newNode.nodeType === 'anime' ? newNode.anime.nodeImage : newNode.manga.nodeImage;
+            if (nodeImage) {
+                void loadTexture(item.mal_id.toString(), nodeImage);
             }
 
             if (item.relations) {

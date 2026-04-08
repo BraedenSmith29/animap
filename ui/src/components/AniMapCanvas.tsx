@@ -62,16 +62,7 @@ export function AniMapCanvas({ graph, setSelectedNode }: Props) {
                 labelType="all"
                 draggable={true}
                 layoutType="treeLr2d"
-                renderNode={({ node }) => {
-                    const n = node as unknown as Node;
-                    if (n.nodeType === 'anime') {
-                        return <GraphNodeIcon malUrl={n.anime.nodeImage || ''} />;
-                    } else if (n.nodeType === 'manga') {
-                        return <GraphNodeIcon malUrl={n.manga.nodeImage || ''} />;
-                    } else {
-                        return null;
-                    }
-                }}
+                renderNode={({ node }) => <GraphNodeIcon node={node as unknown as Node} />}
                 onNodeClick={(node) => setSelectedNode(node as unknown as Node)}
                 onCanvasClick={() => setSelectedNode(null)}
             />
