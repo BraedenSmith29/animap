@@ -9,7 +9,7 @@ export function clearTextureCache() {
 export async function loadTexture(id: string, url: string): Promise<THREE.Texture | null> {
     if (cache.has(id)) return cache.get(id)!;
 
-    cache.set(id, new Promise((resolve) => {
+    const loadTexturePromise = new Promise<THREE.Texture | null>((resolve) => {
         const loader = new THREE.TextureLoader();
         loader.load(
             `/api/v1/fetchImage?imageUrl=${encodeURIComponent(url)}`,
@@ -20,9 +20,11 @@ export async function loadTexture(id: string, url: string): Promise<THREE.Textur
                 resolve(null);
             }
         );
-    }));
+    });
 
-    return cache.get(id)!;
+    cache.set(id, loadTexturePromise);
+
+    return loadTexturePromise;
 }
 
 function processTexture(texture: THREE.Texture) {
