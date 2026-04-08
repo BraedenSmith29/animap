@@ -18,7 +18,7 @@ export async function loadTexture(id: string, url: string): Promise<THREE.Textur
             (err) => {
                 console.error('Error loading texture:', err);
                 resolve(null);
-            }
+            },
         );
     });
 

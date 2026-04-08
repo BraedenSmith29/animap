@@ -1,6 +1,6 @@
 import './DetailsSidebar.css';
-import type { Anime } from '../../types/graph.ts';
-import { Icon } from '../Icon.tsx';
+import type { Anime } from '@/types';
+import { Icon } from '@/components';
 
 type Props = {
     anime: Anime;

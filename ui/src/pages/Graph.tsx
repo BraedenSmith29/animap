@@ -1,11 +1,9 @@
 import './Graph.css';
 import { useEffect, useState } from 'react';
-import { AniMapCanvas } from '../components';
-import { useJikanGraph } from '../hooks/useJikanGraph.ts';
-import type { Node } from '../types/graph.ts';
+import { AniMapCanvas, DetailsSidebar, SearchBar } from '@/components';
+import { useJikanGraph } from '@/hooks';
+import type { Node } from '@/types';
 import { Link, useParams } from 'react-router';
-import { SearchBar } from '../components/searchBar/SearchBar.tsx';
-import { DetailsSidebar } from '../components/sidebar/DetailsSidebar.tsx';
 
 export function Graph() {
     const { type, id } = useParams();
@@ -27,7 +25,7 @@ export function Graph() {
 
     useEffect(() => {
         handleSelectedNode(null);
-    }, [type, id])
+    }, [type, id]);
 
     return <>
         <div className="graph__header">

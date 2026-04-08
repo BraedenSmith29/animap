@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { darkTheme, GraphCanvas } from 'reagraph';
 import type { Theme } from 'reagraph';
-import { GraphNodeIcon } from './nodeIcon/GraphNodeIcon.tsx';
-import type { Node, Graph } from '../types/graph';
+import { darkTheme, GraphCanvas } from 'reagraph';
+import { GraphNodeIcon } from '@/components';
+import type { Graph, Node } from '@/types';
 
 interface Props {
     graph: Graph;

@@ -1,8 +1,8 @@
-import { createContext, useCallback, useContext, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { createContext, useCallback, useContext, useRef } from 'react';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
-import { cacheGet, cacheSet, clearExpired } from '../utils/jikanCache';
-import type { MediaType } from '../types/graph.ts';
+import { cacheGet, cacheSet, clearExpired } from '@/utils/jikanCache.ts';
+import type { MediaType } from '@/types';
 
 interface QueueItem {
     resolve: (value?: any) => void;

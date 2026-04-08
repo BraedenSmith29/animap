@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Graph, MediaType, Node } from '../types/graph.ts';
+import type { Graph, MediaType, Node } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
-import { useJikanClientContext } from '../contexts/JikanClientContext.tsx';
-import { createAnimeNode, createMangaNode } from '../utils/jikanProcessing.ts';
-import { clearTextureCache, loadTexture } from '../utils/textureCache.ts';
+import { useJikanClientContext } from '@/contexts';
+import { clearTextureCache, loadTexture } from '@/utils/textureCache.ts';
+import { createAnimeNode, createMangaNode } from '@/utils/jikanProcessing.ts';
 
 export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
     const jikanClient = useJikanClientContext();

@@ -1,11 +1,11 @@
 import './SearchBar.css';
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { Icon } from '../Icon.tsx';
+import { Icon } from '@/components';
+import { SearchBarDropdown } from '@/components/searchBar';
 import { useNavigate } from 'react-router';
-import { SearchBarDropdown } from './SearchBarDropdown.tsx';
-import { useJikanClientContext } from '../../contexts/JikanClientContext.tsx';
-import { getEnglishTitle, getJapaneseTitle, getPortraitImage, getTitle } from '../../utils/jikanProcessing.ts';
-import type { SearchResult } from '../../types/searchBar.ts';
+import { useJikanClientContext } from '@/contexts';
+import { getEnglishTitle, getJapaneseTitle, getPortraitImage, getTitle } from '@/utils/jikanProcessing.ts';
+import type { SearchResult } from '@/types';
 
 export function SearchBar() {
     const navigate = useNavigate();
@@ -98,7 +98,7 @@ export function SearchBar() {
         setQuery('');
         setResults([]);
         setActiveIdx(-1);
-    }
+    };
 
     function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
         if (!open) return;
