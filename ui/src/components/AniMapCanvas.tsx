@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { darkTheme, GraphCanvas } from 'reagraph';
 import type { Theme } from 'reagraph';
-import { GraphNodeIcon } from './GraphNodeIcon.tsx';
+import { GraphNodeIcon } from './nodeIcon/GraphNodeIcon.tsx';
 import type { Node, Graph } from '../types/graph';
 
 interface Props {

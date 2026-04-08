@@ -1,8 +1,8 @@
 import { CircularImage } from './CircularImage.tsx';
 import * as THREE from 'three';
-import type { Anime, Manga, Node } from '../types/graph.ts';
+import type { Anime, Manga, Node } from '../../types/graph.ts';
 import { useEffect, useState } from 'react';
-import { loadTexture } from '../utils/textureCache.ts';
+import { loadTexture } from '../../utils/textureCache.ts';
 
 interface Props {
     node: Node;
