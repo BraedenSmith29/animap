@@ -1,5 +1,5 @@
 import './Graph.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AniMapCanvas } from '../components';
 import { useJikanGraph } from '../hooks/useJikanGraph.ts';
 import type { Node } from '../types/graph.ts';
@@ -8,8 +8,8 @@ import { SearchBar } from '../components/searchBar/SearchBar.tsx';
 import { DetailsSidebar } from '../components/sidebar/DetailsSidebar.tsx';
 
 export function Graph() {
-    const { animeId } = useParams();
-    const { graph, loading } = useJikanGraph(animeId);
+    const { type, id } = useParams();
+    const { graph, loading } = useJikanGraph(type, id);
     const [selectedNode, setSelectedNode] = useState<Node | null>(null);
     const [isSidebarClosing, setIsSidebarClosing] = useState(false);
 
@@ -24,6 +24,10 @@ export function Graph() {
             setIsSidebarClosing(true);
         }
     };
+
+    useEffect(() => {
+        handleSelectedNode(null);
+    }, [type, id])
 
     return <>
         <div className="graph__header">

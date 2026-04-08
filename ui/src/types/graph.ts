@@ -40,6 +40,8 @@ export interface Manga {
     chapters: number | null;
 }
 
+export type MediaType = 'anime' | 'manga'
+
 export interface BaseNode {
     id: string;
     label: string;

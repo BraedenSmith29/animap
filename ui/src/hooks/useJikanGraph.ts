@@ -1,72 +1,27 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Graph } from '../types/graph.ts';
-import { useJikanClient } from './useJikanClient.ts';
-import type { Anime, JikanImages, JikanResourceTitle, Manga } from '@tutkli/jikan-ts/types';
+import type { Graph, MediaType } from '../types/graph.ts';
+import type { Anime, Manga } from '@tutkli/jikan-ts/types';
+import { useJikanClientContext } from '../contexts/JikanClientContext.tsx';
+import {
+    getDurationMinutes,
+    getEnglishTitle,
+    getJapaneseTitle,
+    getNodeImage,
+    getPortraitImage,
+    getTitle,
+    isNsfw,
+} from '../utils/jikanProcessing.ts';
 
-const NSFW_GENRES = [9, 12, 49];
-
-function getPortraitImage(images: JikanImages): string | null {
-    return images.webp?.maximum_image_url
-        ?? images.jpg?.maximum_image_url
-        ?? images.webp?.large_image_url
-        ?? images.jpg?.large_image_url
-        ?? images.webp?.medium_image_url
-        ?? images.jpg?.medium_image_url
-        ?? images.webp?.image_url
-        ?? images.jpg?.image_url
-        ?? images.webp?.small_image_url
-        ?? images.jpg?.small_image_url;
-}
-
-function getNodeImage(images: JikanImages): string | null {
-    return images.webp?.medium_image_url
-        ?? images.jpg?.medium_image_url
-        ?? images.webp?.large_image_url
-        ?? images.jpg?.large_image_url
-        ?? images.webp?.maximum_image_url
-        ?? images.jpg?.maximum_image_url
-        ?? images.webp?.image_url
-        ?? images.jpg?.image_url
-        ?? images.webp?.small_image_url
-        ?? images.jpg?.small_image_url;
-}
-
-function getTitle(titles: JikanResourceTitle[]): string | null {
-    return titles.find(t => t.type === 'Default')?.title ?? null;
-}
-
-function getEnglishTitle(titles: JikanResourceTitle[]): string | null {
-    return titles.find(t => t.type === 'English')?.title ?? null;
-}
-
-function getJapaneseTitle(titles: JikanResourceTitle[]): string | null {
-    return titles.find(t => t.type === 'Japanese')?.title ?? null;
-}
-
-function isNsfw(item: Anime | Manga): boolean {
-    return item.genres.find(g => NSFW_GENRES.includes(g.mal_id)) !== undefined;
-}
-
-function getDurationMinutes(duration: string | null): number | null {
-    if (!duration || duration === 'Unknown') return null;
-    const hrMatch = duration.match(/(\d+) hr/);
-    const minMatch = duration.match(/(\d+) min/);
-    if (!hrMatch && !minMatch) return null;
-    const hours = hrMatch ? parseInt(hrMatch[1], 10) : 0;
-    const minutes = minMatch ? parseInt(minMatch[1], 10) : 0;
-    return hours * 60 + minutes;
-}
-
-export function useJikanGraph(sourceId: string | undefined) {
-    const jikanClient = useJikanClient();
+export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
+    const jikanClient = useJikanClientContext();
     const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] });
     const [loading, setLoading] = useState(false);
 
-    const fetchJikanGraph = useCallback(async (sourceId: string, signal: AbortSignal) => {
+    const fetchJikanGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal) => {
         let newGraph: Graph = { nodes: [], edges: [] };
-        let queue: { type: 'anime' | 'manga', id: string }[] = [{ type: 'anime', id: sourceId }];
+        let queue: { type: MediaType, id: string }[] = [{ type: sourceType, id: sourceId }];
         let alreadyQueued: Set<string> = new Set();
-        alreadyQueued.add('anime' + sourceId);
+        alreadyQueued.add(sourceType + sourceId);
         while (queue.length > 0) {
             if (signal.aborted) return;
             const nextItem = queue.shift();
@@ -160,7 +115,7 @@ export function useJikanGraph(sourceId: string | undefined) {
     }, []);
 
     useEffect(() => {
-        if (!sourceId) {
+        if (!sourceId || sourceType !== 'anime' && sourceType !== 'manga') {
             return;
         }
 
@@ -168,10 +123,14 @@ export function useJikanGraph(sourceId: string | undefined) {
         setGraph({ nodes: [], edges: [] });
 
         const controller = new AbortController();
-        fetchJikanGraph(sourceId, controller.signal)
+        fetchJikanGraph(sourceType, sourceId, controller.signal)
             .then((graph) => {
                 if (graph) {
                     setGraph(graph);
+                }
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) {
                     setLoading(false);
                 }
             });

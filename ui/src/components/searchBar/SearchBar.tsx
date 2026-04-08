@@ -3,43 +3,83 @@ import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Icon } from '../Icon.tsx';
 import { useNavigate } from 'react-router';
 import { SearchBarDropdown } from './SearchBarDropdown.tsx';
-
-const MOCK_ANIME: { id: number; title: string; }[] = [
-    { id: 121, title: 'Fullmetal Alchemist (2003)' },
-    { id: 5114, title: 'Fullmetal Alchemist: Brotherhood' },
-    { id: 9253, title: 'Steins;Gate' },
-    { id: 22297, title: 'Fate/stay night: Unlimited Blade Works' },
-    { id: 31240, title: 'Re:Zero kara Hajimeru Isekai Seikatsu' },
-    { id: 52991, title: 'Sousou no Frieren' },
-];
-
-const MAX_RESULTS = 6;
+import { useJikanClientContext } from '../../contexts/JikanClientContext.tsx';
+import { getEnglishTitle, getJapaneseTitle, getPortraitImage, getTitle } from '../../utils/jikanProcessing.ts';
+import type { SearchResult } from '../../types/searchBar.ts';
 
 export function SearchBar() {
     const navigate = useNavigate();
+    const jikanClient = useJikanClientContext();
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState<typeof MOCK_ANIME>([]);
+    const [results, setResults] = useState<SearchResult[]>([]);
     const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [activeIdx, setActiveIdx] = useState(-1);
 
-    const onInputChange = (newValue: string) => {
-        setQuery(newValue);
-        const q = newValue.trim().toLowerCase();
+    useEffect(() => {
+        const q = query.trim().toLowerCase();
         if (!q) {
             setResults([]);
             setOpen(false);
+            setLoading(false);
             setActiveIdx(-1);
             return;
         }
-        const filtered = MOCK_ANIME
-            .filter(a => a.title.toLowerCase().includes(q))
-            .slice(0, MAX_RESULTS);
-        setResults(filtered);
-        setOpen(true);
-        setActiveIdx(0);
-    };
+
+        const abortController = new AbortController();
+        setLoading(true);
+
+        const timeoutId = setTimeout(async () => {
+            try {
+                const [animeData, mangaData] = await Promise.all([
+                    jikanClient.search('anime', q, abortController.signal),
+                    jikanClient.search('manga', q, abortController.signal),
+                ]);
+
+                const animeResults: SearchResult[] =
+                    (animeData || []).filter((r1, i, self) => {
+                        return self.findIndex((r2) => r2.mal_id === r1.mal_id) === i;
+                    }).map((item) => ({
+                        id: item.mal_id,
+                        title: getTitle(item.titles),
+                        enTitle: getEnglishTitle(item.titles),
+                        jaTitle: getJapaneseTitle(item.titles),
+                        portraitImage: getPortraitImage(item.images),
+                        type: 'anime',
+                    }));
+
+                const mangaResults: SearchResult[] =
+                    (mangaData || []).filter((r1, i, self) => {
+                        return self.findIndex((r2) => r2.mal_id === r1.mal_id) === i;
+                    }).map((item) => ({
+                        id: item.mal_id,
+                        title: getTitle(item.titles),
+                        enTitle: getEnglishTitle(item.titles),
+                        jaTitle: getJapaneseTitle(item.titles),
+                        portraitImage: getPortraitImage(item.images),
+                        type: 'manga',
+                    }));
+
+                const combinedResults = [...animeResults, ...mangaResults];
+                setResults(combinedResults);
+                setOpen(true);
+                setLoading(false);
+                setActiveIdx(combinedResults.length > 0 ? 0 : -1);
+            } catch (error) {
+                if (error instanceof Error && error.name === 'AbortError') return;
+                console.error('Failed to fetch search results:', error);
+                setResults([]);
+                setLoading(false);
+            }
+        }, 300);
+
+        return () => {
+            abortController.abort();
+            clearTimeout(timeoutId);
+        };
+    }, [query]);
 
     useEffect(() => {
         function handleClick(e: MouseEvent) {
@@ -52,8 +92,8 @@ export function SearchBar() {
         return () => document.removeEventListener('mousedown', handleClick);
     }, []);
 
-    const selectOption = (animeId: number) => {
-        navigate(`/${animeId}`);
+    const selectOption = (option: SearchResult) => {
+        navigate(`/${option.type}/${option.id}`);
         setOpen(false);
         setQuery('');
         setResults([]);
@@ -71,7 +111,8 @@ export function SearchBar() {
         } else if (e.key === 'Escape') {
             setOpen(false);
         } else if (e.key === 'Enter' && activeIdx >= 0 && results.length > activeIdx) {
-            selectOption(results[activeIdx].id);
+            const selected = results[activeIdx];
+            selectOption(selected);
         }
     }
 
@@ -81,19 +122,19 @@ export function SearchBar() {
             <input
                 className="search__input"
                 type="text"
-                placeholder="Search anime…"
+                placeholder="Search anime or manga…"
                 value={query}
-                onChange={e => onInputChange(e.target.value)}
+                onChange={e => setQuery(e.target.value)}
                 onFocus={() => setOpen(true)}
                 onKeyDown={handleKeyDown}
-                aria-label="Search anime"
+                aria-label="Search anime or manga"
                 autoComplete="off"
                 spellCheck={false}
             />
             {query && (
                 <button
                     className="search__clear"
-                    onClick={() => onInputChange('')}
+                    onClick={() => setQuery('')}
                     aria-label="Clear search"
                 >
                     <Icon type="close" />
@@ -103,6 +144,7 @@ export function SearchBar() {
         {open && query &&
             <SearchBarDropdown
                 results={results}
+                loading={loading}
                 activeIdx={activeIdx}
                 setActiveIdx={setActiveIdx}
                 selectOption={selectOption}
