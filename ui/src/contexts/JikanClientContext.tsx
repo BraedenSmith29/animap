@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { cacheGet, cacheSet, clearExpired } from '../utils/jikanCache';
+import type { MediaType } from '../types/graph.ts';
 
 interface QueueItem {
     resolve: (value?: any) => void;
@@ -9,8 +10,8 @@ interface QueueItem {
 }
 
 interface JikanClientContextType {
-    getDetails: (type: string, currentId: string, signal: AbortSignal) => Promise<Anime | Manga | null>;
-    search: (type: string, query: string, signal: AbortSignal) => Promise<Anime[] | Manga[] | null>;
+    getDetails: (type: MediaType, currentId: string, signal: AbortSignal) => Promise<Anime | Manga | null>;
+    search: (type: MediaType, query: string, signal: AbortSignal) => Promise<Anime[] | Manga[] | null>;
 }
 
 const JikanClientContext = createContext<JikanClientContextType | null>(null);
@@ -49,7 +50,7 @@ export function JikanClientProvider({ children }: { children: ReactNode }) {
     }, [startRunner]);
 
     const getDetails = useCallback(
-        async (type: string, currentId: string, signal: AbortSignal) => {
+        async (type: MediaType, currentId: string, signal: AbortSignal) => {
             const key = `animap:${type}:${currentId}`;
             const cachedData = await cacheGet(key);
             if (cachedData) {
@@ -94,7 +95,7 @@ export function JikanClientProvider({ children }: { children: ReactNode }) {
     );
 
     const search = useCallback(
-        async (type: string, query: string, signal: AbortSignal) => {
+        async (type: MediaType, query: string, signal: AbortSignal) => {
             await addToQueue(signal, true);
             while (true) {
                 let response;
