@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Graph, MediaType, Node } from '../types/graph.ts';
+import type { Graph, MediaType, Node } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
-import { useJikanClientContext } from '../contexts/JikanClientContext.tsx';
-import { createAnimeNode, createMangaNode } from '../utils/jikanProcessing.ts';
-import { clearTextureCache, loadTexture } from '../utils/textureCache.ts';
+import { clearTextureCache, loadTexture } from '@/utils/textureCache.ts';
+import { createAnimeNode, createMangaNode } from '@/utils/jikanProcessing.ts';
+import { getDetailsFromJikan } from '@/utils/jikanClient.ts';
 
 export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
-    const jikanClient = useJikanClientContext();
     const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] });
     const [loading, setLoading] = useState(false);
 
@@ -21,7 +20,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             if (!nextItem) continue;
             const { type, id: currentId } = nextItem;
 
-            const item = await jikanClient.getDetails(type, currentId, signal);
+            const item = await getDetailsFromJikan(type, currentId, signal);
             if (!item) continue;
 
             let newNode: Node;
@@ -91,7 +90,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         return () => {
             controller.abort();
         };
-    }, [sourceId, fetchJikanGraph]);
+    }, [sourceType, sourceId, fetchJikanGraph]);
 
     return { graph, loading };
 }

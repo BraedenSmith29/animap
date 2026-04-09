@@ -1,4 +1,4 @@
-import type { MediaType } from './graph.ts';
+import type { MediaType } from '@/types';
 
 export interface SearchResult {
     id: number;

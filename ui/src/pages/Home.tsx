@@ -1,10 +1,7 @@
 import './Home.css';
-import { Icon } from '../components/Icon.tsx';
-import { SearchBar } from '../components/searchBar/SearchBar.tsx';
-
+import { Icon, SearchBar } from '@/components';
 
 export function Home() {
-
     return (
         <div className="home">
             <h1 className="home__title">Ani<span>Map</span></h1>

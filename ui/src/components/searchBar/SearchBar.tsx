@@ -1,15 +1,14 @@
 import './SearchBar.css';
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { Icon } from '../Icon.tsx';
+import { Icon } from '@/components/Icon.tsx';
+import { SearchBarDropdown } from '@/components/searchBar/SearchBarDropdown.tsx';
 import { useNavigate } from 'react-router';
-import { SearchBarDropdown } from './SearchBarDropdown.tsx';
-import { useJikanClientContext } from '../../contexts/JikanClientContext.tsx';
-import { getEnglishTitle, getJapaneseTitle, getPortraitImage, getTitle } from '../../utils/jikanProcessing.ts';
-import type { SearchResult } from '../../types/searchBar.ts';
+import { getEnglishTitle, getJapaneseTitle, getPortraitImage, getTitle } from '@/utils/jikanProcessing.ts';
+import type { SearchResult } from '@/types';
+import { searchJikan } from '@/utils/jikanClient.ts';
 
 export function SearchBar() {
     const navigate = useNavigate();
-    const jikanClient = useJikanClientContext();
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     const [query, setQuery] = useState('');
@@ -34,8 +33,8 @@ export function SearchBar() {
         const timeoutId = setTimeout(async () => {
             try {
                 const [animeData, mangaData] = await Promise.all([
-                    jikanClient.search('anime', q, abortController.signal),
-                    jikanClient.search('manga', q, abortController.signal),
+                    searchJikan('anime', q, abortController.signal),
+                    searchJikan('manga', q, abortController.signal),
                 ]);
 
                 const animeResults: SearchResult[] =
@@ -98,7 +97,7 @@ export function SearchBar() {
         setQuery('');
         setResults([]);
         setActiveIdx(-1);
-    }
+    };
 
     function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
         if (!open) return;

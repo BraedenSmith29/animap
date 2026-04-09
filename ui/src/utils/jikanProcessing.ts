@@ -1,5 +1,5 @@
 import type { Anime, JikanImages, JikanResourceTitle, Manga } from '@tutkli/jikan-ts/types';
-import type { Node } from '../types/graph.ts';
+import type { Node } from '@/types';
 
 const NSFW_GENRES = [9, 12, 49];
 
@@ -80,7 +80,7 @@ export function createAnimeNode(anime: Anime): Node {
             duration: getDurationMinutes(anime.duration),
             rating: anime.rating ?? null,
         },
-    }
+    };
 }
 
 export function createMangaNode(manga: Manga): Node {
@@ -106,5 +106,5 @@ export function createMangaNode(manga: Manga): Node {
             volumes: manga.volumes,
             chapters: manga.chapters,
         },
-    }
+    };
 }

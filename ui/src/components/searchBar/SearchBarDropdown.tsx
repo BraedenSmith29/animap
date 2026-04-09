@@ -1,5 +1,4 @@
-import type { MediaType } from '../../types/graph.ts';
-import type { SearchResult } from '../../types/searchBar.ts';
+import type { MediaType, SearchResult } from '@/types';
 
 interface Props {
     results: SearchResult[];

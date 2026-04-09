@@ -1,9 +1,9 @@
-import { CircularImage } from './CircularImage.tsx';
+import { CircularImage } from '@/components/nodeIcon/CircularImage.tsx';
+import { FallbackIcon } from '@/components/nodeIcon/FallbackIcon.tsx';
 import * as THREE from 'three';
-import type { Node } from '../../types/graph.ts';
+import type { Node } from '@/types';
 import { useEffect, useState } from 'react';
-import { loadTexture } from '../../utils/textureCache.ts';
-import { FallbackIcon } from './FallbackIcon.tsx';
+import { loadTexture } from '@/utils/textureCache.ts';
 
 interface Props {
     node: Node;
