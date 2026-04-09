@@ -31,25 +31,34 @@ export const cacheSet = async (key: string, value: any) => {
     return new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(STORE_NAME, 'readwrite');
         const store = transaction.objectStore(STORE_NAME);
-        const request = store.put({ key, ...value });
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
+        store.put({ key, ...value });
+
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
     });
 };
 
 export const clearExpired = async () => {
     const db = await getDB();
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.openCursor();
-    const now = Date.now();
-    request.onsuccess = () => {
-        const cursor = request.result;
-        if (cursor) {
+    return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(STORE_NAME, 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.openCursor();
+        const now = Date.now();
+
+        request.onsuccess = () => {
+            const cursor = request.result;
+            if (!cursor) return;
+
             if (cursor.value.expiration < now) {
                 cursor.delete();
             }
             cursor.continue();
-        }
-    };
+        };
+
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+    });
 };
