@@ -40,7 +40,11 @@ export function SearchBarDropdown({ results, loading, activeIdx, setActiveIdx, s
                             </div>
                             <div className="search__dropdown-item__info">
                                 <div className="search__dropdown-item__name">{item.title}</div>
-                                <div className="search__dropdown-item__subtitle">{item.enTitle || item.jaTitle}</div>
+                                <div className="search__dropdown-item__subtitle">
+                                    {item.format}
+                                    {item.format && item.year && " - "}
+                                    {item.year}
+                                </div>
                             </div>
                         </div>
                     );

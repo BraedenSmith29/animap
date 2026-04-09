@@ -3,9 +3,16 @@ import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/Icon.tsx';
 import { SearchBarDropdown } from '@/components/searchBar/SearchBarDropdown.tsx';
 import { useNavigate } from 'react-router';
-import { getEnglishTitle, getJapaneseTitle, getPortraitImage, getTitle } from '@/utils/jikanProcessing.ts';
-import type { SearchResult } from '@/types';
-import { searchJikan } from '@/utils/jikanClient.ts';
+import type { MalSearchResponse, SearchResult } from '@/types';
+
+function sectionSize(tagetSectionCount: number, otherSectionCount: number) {
+    const targetPerSection = 3;
+    if (otherSectionCount >= targetPerSection) {
+        return Math.min(tagetSectionCount, targetPerSection);
+    } else {
+        return Math.min(tagetSectionCount, targetPerSection * 2 - otherSectionCount);
+    }
+}
 
 export function SearchBar() {
     const navigate = useNavigate();
@@ -32,32 +39,30 @@ export function SearchBar() {
 
         const timeoutId = setTimeout(async () => {
             try {
-                const [animeData, mangaData] = await Promise.all([
-                    searchJikan('anime', q, abortController.signal),
-                    searchJikan('manga', q, abortController.signal),
-                ]);
+                const newSearch: MalSearchResponse = await fetch(`/api/v1/malProxy?url=${encodeURIComponent(`https://myanimelist.net/search/prefix.json?type=all&keyword=${encodeURIComponent(q)}`)}`)
+                    .then(response => response.json());
 
-                const animeResults: SearchResult[] =
-                    (animeData || []).filter((r1, i, self) => {
-                        return self.findIndex((r2) => r2.mal_id === r1.mal_id) === i;
-                    }).map((item) => ({
-                        id: item.mal_id,
-                        title: getTitle(item.titles),
-                        enTitle: getEnglishTitle(item.titles),
-                        jaTitle: getJapaneseTitle(item.titles),
-                        portraitImage: getPortraitImage(item.images),
+                const allAnimeResults = newSearch.categories.find((result) => result.type === 'anime')?.items ?? [];
+                const allMangaResults = newSearch.categories.find((result) => result.type === 'manga')?.items ?? [];
+
+                const animeResults: SearchResult[] = allAnimeResults
+                    .slice(0, sectionSize(allAnimeResults.length, allMangaResults.length))
+                    .map((item): SearchResult => ({
+                        id: item.id,
+                        title: item.name,
+                        portraitImage: item.image_url ?? null,
+                        format: item.payload?.media_type ?? null,
+                        year: item.payload?.start_year ?? null,
                         type: 'anime',
                     }));
-
-                const mangaResults: SearchResult[] =
-                    (mangaData || []).filter((r1, i, self) => {
-                        return self.findIndex((r2) => r2.mal_id === r1.mal_id) === i;
-                    }).map((item) => ({
-                        id: item.mal_id,
-                        title: getTitle(item.titles),
-                        enTitle: getEnglishTitle(item.titles),
-                        jaTitle: getJapaneseTitle(item.titles),
-                        portraitImage: getPortraitImage(item.images),
+                const mangaResults: SearchResult[] = allMangaResults
+                    .slice(0, sectionSize(allMangaResults.length, allAnimeResults.length))
+                    .map((item): SearchResult => ({
+                        id: item.id,
+                        title: item.name,
+                        portraitImage: item.image_url ?? null,
+                        format: item.payload?.media_type ?? null,
+                        year: item.payload?.start_year ?? null,
                         type: 'manga',
                     }));
 
