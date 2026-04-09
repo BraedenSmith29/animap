@@ -14,7 +14,7 @@ async function startRunner()  {
     if (processing) return;
     processing = true;
 
-    await clearExpired();
+    await clearExpired().catch(console.error);
 
     let nextRequest = queue.shift();
     while (nextRequest) {
@@ -41,7 +41,7 @@ async function addToQueue(signal: AbortSignal, skipToFront: boolean) {
 
 export async function getDetailsFromJikan(type: MediaType, currentId: string, signal: AbortSignal) {
     const key = `animap:${type}:${currentId}`;
-    const cachedData = await cacheGet(key);
+    const cachedData = await cacheGet(key).catch(() => null);
     if (cachedData) {
         if (cachedData.expiration && cachedData.expiration > Date.now()) {
             return cachedData.data;
@@ -75,7 +75,7 @@ export async function getDetailsFromJikan(type: MediaType, currentId: string, si
             await cacheSet(key, {
                 expiration: Date.now() + 1000 * 60 * 60 * 24 * 7,
                 data: body.data,
-            });
+            }).catch(console.error);
             return body.data;
         }
     }
