@@ -3,13 +3,12 @@ import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components';
 import { SearchBarDropdown } from '@/components/searchBar';
 import { useNavigate } from 'react-router';
-import { useJikanClientContext } from '@/contexts';
 import { getEnglishTitle, getJapaneseTitle, getPortraitImage, getTitle } from '@/utils/jikanProcessing.ts';
 import type { SearchResult } from '@/types';
+import { searchJikan } from '@/utils/jikanClient.ts';
 
 export function SearchBar() {
     const navigate = useNavigate();
-    const jikanClient = useJikanClientContext();
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     const [query, setQuery] = useState('');
@@ -34,8 +33,8 @@ export function SearchBar() {
         const timeoutId = setTimeout(async () => {
             try {
                 const [animeData, mangaData] = await Promise.all([
-                    jikanClient.search('anime', q, abortController.signal),
-                    jikanClient.search('manga', q, abortController.signal),
+                    searchJikan('anime', q, abortController.signal),
+                    searchJikan('manga', q, abortController.signal),
                 ]);
 
                 const animeResults: SearchResult[] =
