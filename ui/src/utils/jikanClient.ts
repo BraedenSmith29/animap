@@ -19,10 +19,10 @@ async function startRunner()  {
     let nextRequest = queue.shift();
     while (nextRequest) {
         nextRequest.resolve();
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        do {
-            nextRequest = queue.shift();
-        } while (nextRequest && nextRequest.signal.aborted);
+        if (!nextRequest.signal.aborted) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        nextRequest = queue.shift();
     }
 
     processing = false;
