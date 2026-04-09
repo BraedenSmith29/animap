@@ -1,5 +1,6 @@
 import type { Node } from '@/types';
-import { AnimeDetailsSidebar, MangaDetailsSidebar } from '@/components/sidebar';
+import { AnimeDetailsSidebar } from '@/components/sidebar/AnimeDetailsSidebar.tsx';
+import { MangaDetailsSidebar } from '@/components/sidebar/MangaDetailsSidebar.tsx';
 
 type Props = {
     node: Node;

@@ -1,4 +1,5 @@
-import { CircularImage, FallbackIcon } from '@/components/nodeIcon';
+import { CircularImage } from '@/components/nodeIcon/CircularImage.tsx';
+import { FallbackIcon } from '@/components/nodeIcon/FallbackIcon.tsx';
 import * as THREE from 'three';
 import type { Node } from '@/types';
 import { useEffect, useState } from 'react';

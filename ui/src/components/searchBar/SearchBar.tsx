@@ -1,7 +1,7 @@
 import './SearchBar.css';
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { Icon } from '@/components';
-import { SearchBarDropdown } from '@/components/searchBar';
+import { Icon } from '@/components/Icon.tsx';
+import { SearchBarDropdown } from '@/components/searchBar/SearchBarDropdown.tsx';
 import { useNavigate } from 'react-router';
 import { getEnglishTitle, getJapaneseTitle, getPortraitImage, getTitle } from '@/utils/jikanProcessing.ts';
 import type { SearchResult } from '@/types';

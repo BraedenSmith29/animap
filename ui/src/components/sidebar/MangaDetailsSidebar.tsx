@@ -1,6 +1,6 @@
 import './DetailsSidebar.css';
 import type { Manga } from '@/types';
-import { Icon } from '@/components';
+import { Icon } from '@/components/Icon.tsx';
 
 type Props = {
     manga: Manga;
