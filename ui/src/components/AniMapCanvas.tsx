@@ -2,15 +2,16 @@ import { useMemo } from 'react';
 import type { Theme } from 'reagraph';
 import { darkTheme, GraphCanvas } from 'reagraph';
 import { GraphNodeIcon } from '@/components/nodeIcon';
-import type { Graph, Node } from '@/types';
+import type { Graph, MediaType, Node } from '@/types';
 
 interface Props {
     graph: Graph;
     setSelectedNode: (node: Node | null) => void;
     deleteSubgraph: (nodeId: string) => void;
+    expandGraph: (nodeType: MediaType, nodeId: string) => void;
 }
 
-export function AniMapCanvas({ graph, setSelectedNode, deleteSubgraph }: Props) {
+export function AniMapCanvas({ graph, setSelectedNode, deleteSubgraph, expandGraph }: Props) {
     const graphTheme = useMemo<Theme>(() => {
         if (typeof window === 'undefined') {
             return darkTheme;
@@ -55,8 +56,12 @@ export function AniMapCanvas({ graph, setSelectedNode, deleteSubgraph }: Props) 
     }, []);
 
     const handleDoubleClick = (node: Node) => {
-        deleteSubgraph(node.id);
-        setSelectedNode(null);
+        if (node.nodeType) {
+            deleteSubgraph(node.id);
+            setSelectedNode(null);
+        } else {
+            expandGraph(node.medialType, node.malId);
+        }
     }
 
     return (

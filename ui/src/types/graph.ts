@@ -59,6 +59,8 @@ export interface MangaNode extends BaseNode {
 
 export interface EmptyNode extends BaseNode {
     nodeType: null;
+    medialType: MediaType;
+    malId: string;
 }
 
 export type Node = AnimeNode | MangaNode | EmptyNode;

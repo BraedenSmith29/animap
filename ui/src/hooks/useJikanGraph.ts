@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FullNode, Graph, MediaType } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
-import { clearTextureCache, loadTexture } from '@/utils/textureCache.ts';
+import { loadTexture } from '@/utils/textureCache.ts';
 import { createAnimeNode, createMangaNode } from '@/utils/jikanProcessing.ts';
 import { getDetailsFromJikan } from '@/utils/jikanClient.ts';
 
@@ -9,12 +9,13 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
     const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] });
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
+    const abortControllersRef = useRef<Set<AbortController>>(new Set<AbortController>());
 
-    const fetchJikanGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal) => {
+    const fetchJikanGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal, existingNodes: string[] = []) => {
         let newGraph: Graph = { nodes: [], edges: [] };
         let queue: { type: MediaType, id: string }[] = [{ type: sourceType, id: sourceId }];
-        const alreadyQueued: Set<string> = new Set([sourceType + sourceId]);
-        let borderQueue: { id: string, title: string }[] = [];
+        const alreadyQueued: Set<string> = new Set([sourceType + sourceId, ...existingNodes]);
+        let borderQueue: { type: MediaType, id: string, title: string }[] = [];
         const likelyCrossoverSet: Set<string> = new Set<string>();
 
         while (queue.length > 0) {
@@ -62,7 +63,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                     if (alreadyQueued.has(targetId)) continue;
 
                     if (!likelyCrossoverSet.has(sourceId)) {
-                        borderQueue = borderQueue.filter((q) => q.id !== targetId);
+                        borderQueue = borderQueue.filter((q) => q.type !== entry.type || q.id !== targetId);
                         alreadyQueued.add(targetId);
                         queue.push({
                             type: entry.type,
@@ -71,9 +72,10 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                         if (relationType === 'Character' || relationType === 'Other') {
                             likelyCrossoverSet.add(targetId);
                         }
-                    } else if (!borderQueue.some((q) => q.id === targetId)) {
+                    } else if (!borderQueue.some((q) => q.type === entry.type && q.id === targetId)) {
                         borderQueue.push({
-                            id: targetId,
+                            type: entry.type,
+                            id: entry.mal_id.toString(),
                             title: entry.name,
                         });
                     }
@@ -83,9 +85,11 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
 
         for (const item of borderQueue) {
             newGraph.nodes.push({
-                id: item.id,
+                id: item.type + item.id,
                 label: item.title,
                 nodeType: null,
+                medialType: item.type,
+                malId: item.id,
             });
         }
 
@@ -128,17 +132,46 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         }));
     };
 
+    const expandGraph = (nodeType: MediaType, malId: string) => {
+        if (!malId || (nodeType !== 'anime' && nodeType !== 'manga')) {
+            return;
+        }
+
+        setLoading(true);
+        setProgress(0);
+
+        const controller = new AbortController();
+        abortControllersRef.current.add(controller);
+        fetchJikanGraph(nodeType, malId, controller.signal, graph.nodes.filter((node) => node.nodeType).map((node) => node.id))
+            .then((newGraph) => {
+                if (newGraph) {
+                    setGraph((oldGraph) => {
+                        return {
+                            nodes: [...oldGraph.nodes.filter((o) => !newGraph.nodes.find((n) => n.id === o.id)), ...newGraph.nodes],
+                            edges: [...oldGraph.edges, ...newGraph.edges],
+                        };
+                    });
+                }
+            })
+            .finally(() => {
+                abortControllersRef.current.delete(controller);
+                if (!controller.signal.aborted && abortControllersRef.current.size === 0) {
+                    setLoading(false);
+                }
+            });
+    };
+
     useEffect(() => {
-        if (!sourceId || sourceType !== 'anime' && sourceType !== 'manga') {
+        if (!sourceId || (sourceType !== 'anime' && sourceType !== 'manga')) {
             return;
         }
 
         setLoading(true);
         setGraph({ nodes: [], edges: [] });
-        clearTextureCache();
         setProgress(0);
 
         const controller = new AbortController();
+        abortControllersRef.current.add(controller);
         fetchJikanGraph(sourceType, sourceId, controller.signal)
             .then((graph) => {
                 if (graph) {
@@ -146,15 +179,18 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                 }
             })
             .finally(() => {
-                if (!controller.signal.aborted) {
+                abortControllersRef.current.delete(controller);
+                if (!controller.signal.aborted && abortControllersRef.current.size === 0) {
                     setLoading(false);
                 }
             });
 
         return () => {
-            controller.abort();
+            for (const c of abortControllersRef.current) {
+                c.abort();
+            }
         };
     }, [sourceType, sourceId, fetchJikanGraph]);
 
-    return { graph, loading, progress, deleteSubgraph };
+    return { graph, loading, progress, deleteSubgraph, expandGraph };
 }

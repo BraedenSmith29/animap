@@ -8,7 +8,7 @@ import { LoadingScreen } from '@/components/loadingScreen/LoadingScreen.tsx';
 
 export function Graph() {
     const { type, id } = useParams();
-    const { graph, loading, progress, deleteSubgraph } = useJikanGraph(type, id);
+    const { graph, loading, progress, deleteSubgraph, expandGraph } = useJikanGraph(type, id);
     const [selectedNode, setSelectedNode] = useState<Node | null>(null);
     const [isSidebarClosing, setIsSidebarClosing] = useState(false);
 
@@ -35,7 +35,12 @@ export function Graph() {
         </div>
         {loading
             ? <LoadingScreen progress={progress} />
-            : <AniMapCanvas graph={graph} setSelectedNode={handleSelectedNode} deleteSubgraph={deleteSubgraph} />
+            : <AniMapCanvas
+                graph={graph}
+                setSelectedNode={handleSelectedNode}
+                deleteSubgraph={deleteSubgraph}
+                expandGraph={expandGraph}
+            />
         }
         {selectedNode && (
             <DetailsSidebar
