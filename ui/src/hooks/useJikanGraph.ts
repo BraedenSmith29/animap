@@ -88,7 +88,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                 id: item.type + item.id,
                 label: item.title,
                 nodeType: null,
-                medialType: item.type,
+                mediaType: item.type,
                 malId: item.id,
             });
         }

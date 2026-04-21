@@ -2,7 +2,7 @@
     position: fixed;
     top: 0;
     right: 0;
-    width: clamp(320px, 29vw, 420px);
+    width: clamp(420px, 29vw, 520px);
     height: 100vh;
     background-color: var(--color-bg-secondary);
     border-left: 1px solid var(--color-border-primary);
@@ -23,6 +23,64 @@
     display: flex;
     align-items: center;
     gap: 0.65rem;
+    position: relative;
+}
+
+.sidebar__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: 8px;
+    padding: 0.4rem;
+    min-width: 140px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    animation: menu-fade-in 0.15s ease-out;
+}
+
+.sidebar__menu-item {
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sidebar__menu-item:hover {
+    background-color: var(--color-bg-primary);
+    color: var(--color-accent-primary);
+}
+
+.sidebar__menu-item--danger {
+    color: #ff4d4d;
+}
+
+.sidebar__menu-item--danger:hover {
+    background-color: #ff4d4d22;
+    color: #ff4d4d;
+}
+
+@keyframes menu-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .sidebar__title {
@@ -42,7 +100,7 @@
     letter-spacing: -0.01em;
 }
 
-.sidebar__button {
+.sidebar__header-button {
     border: 1px solid var(--color-border-primary);
     background: var(--color-bg-tertiary);
     color: var(--color-text-primary);
@@ -57,7 +115,7 @@
     transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.sidebar__button:hover {
+.sidebar__header-button:hover {
     color: var(--color-accent-primary);
     border-color: var(--color-accent-primary);
 }
@@ -94,24 +152,50 @@
     padding: 0.6rem;
 }
 
-.sidebar__mal-link {
+.sidebar__button {
     display: block;
     text-align: center;
     padding: 0.65rem 0.85rem;
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border-primary);
+    border: 1px solid;
     border-radius: 10px;
-    color: var(--color-accent-primary);
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 500;
     transition: all 0.15s ease;
+    cursor: pointer;
 }
 
-.sidebar__mal-link:hover {
+.sidebar__button--primary {
     background: var(--color-accent-primary);
-    color: var(--color-bg-primary);
     border-color: var(--color-accent-primary);
+    color: var(--color-bg-primary);
+}
+
+.sidebar__button--primary:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-accent-primary);
+}
+
+.sidebar__button--secondary {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border-primary);
+    color: var(--color-accent-primary);
+}
+
+.sidebar__button--secondary:hover {
+    background: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+    color: var(--color-bg-primary);
+}
+
+.sidebar__button--danger {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-text-danger);
+    color: var(--color-text-danger);
+}
+
+.sidebar__button--danger:hover {
+    background: var(--color-bg-secondary);
 }
 
 .sidebar__subtitle {
@@ -203,12 +287,6 @@
     border-top: 1px solid var(--color-border-primary);
 }
 
-@media (max-width: 1024px) {
-    .sidebar {
-        width: min(92vw, 420px);
-    }
-}
-
 @keyframes sidebar-swipe-in {
     from {
         transform: translateX(100%);
@@ -231,4 +309,30 @@
     }
 }
 
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 100%;
+    }
 
+    @keyframes sidebar-swipe-in {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes sidebar-swipe-out {
+        from {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+    }
+}

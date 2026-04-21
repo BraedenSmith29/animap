@@ -35,12 +35,7 @@ export function Graph() {
         </div>
         {loading
             ? <LoadingScreen progress={progress} />
-            : <AniMapCanvas
-                graph={graph}
-                setSelectedNode={handleSelectedNode}
-                deleteSubgraph={deleteSubgraph}
-                expandGraph={expandGraph}
-            />
+            : <AniMapCanvas graph={graph} setSelectedNode={handleSelectedNode} />
         }
         {selectedNode && (
             <DetailsSidebar
@@ -51,6 +46,8 @@ export function Graph() {
                     setSelectedNode(null);
                     setIsSidebarClosing(false);
                 }}
+                deleteSubgraph={deleteSubgraph}
+                expandGraph={expandGraph}
             />
         )}
     </>;

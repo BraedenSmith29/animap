@@ -1,17 +1,14 @@
 import { useMemo } from 'react';
-import type { Theme } from 'reagraph';
-import { darkTheme, GraphCanvas } from 'reagraph';
+import { darkTheme, GraphCanvas, type Theme } from 'reagraph';
 import { GraphNodeIcon } from '@/components/nodeIcon';
-import type { Graph, MediaType, Node } from '@/types';
+import type { Graph, Node } from '@/types';
 
 interface Props {
     graph: Graph;
     setSelectedNode: (node: Node | null) => void;
-    deleteSubgraph: (nodeId: string) => void;
-    expandGraph: (nodeType: MediaType, nodeId: string) => void;
 }
 
-export function AniMapCanvas({ graph, setSelectedNode, deleteSubgraph, expandGraph }: Props) {
+export function AniMapCanvas({ graph, setSelectedNode }: Props) {
     const graphTheme = useMemo<Theme>(() => {
         if (typeof window === 'undefined') {
             return darkTheme;
@@ -55,15 +52,6 @@ export function AniMapCanvas({ graph, setSelectedNode, deleteSubgraph, expandGra
         };
     }, []);
 
-    const handleDoubleClick = (node: Node) => {
-        if (node.nodeType) {
-            deleteSubgraph(node.id);
-            setSelectedNode(null);
-        } else {
-            expandGraph(node.medialType, node.malId);
-        }
-    }
-
     return (
         <div>
             <GraphCanvas
@@ -75,7 +63,6 @@ export function AniMapCanvas({ graph, setSelectedNode, deleteSubgraph, expandGra
                 layoutType="treeLr2d"
                 renderNode={({ node }) => <GraphNodeIcon node={node as unknown as Node} />}
                 onNodeClick={(node) => setSelectedNode(node as unknown as Node)}
-                onNodeDoubleClick={(node) => handleDoubleClick(node as unknown as Node)}
                 onCanvasClick={() => setSelectedNode(null)}
             />
         </div>
