@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Graph, MediaType, Node } from '@/types';
+import type { FullNode, Graph, MediaType } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { clearTextureCache, loadTexture } from '@/utils/textureCache.ts';
 import { createAnimeNode, createMangaNode } from '@/utils/jikanProcessing.ts';
@@ -8,12 +8,15 @@ import { getDetailsFromJikan } from '@/utils/jikanClient.ts';
 export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
     const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] });
     const [loading, setLoading] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     const fetchJikanGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal) => {
         let newGraph: Graph = { nodes: [], edges: [] };
         let queue: { type: MediaType, id: string }[] = [{ type: sourceType, id: sourceId }];
-        let alreadyQueued: Set<string> = new Set();
-        alreadyQueued.add(sourceType + sourceId);
+        const alreadyQueued: Set<string> = new Set([sourceType + sourceId]);
+        let borderQueue: { id: string, title: string }[] = [];
+        const likelyCrossoverSet: Set<string> = new Set<string>();
+
         while (queue.length > 0) {
             if (signal.aborted) return;
             const nextItem = queue.shift();
@@ -23,7 +26,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             const item = await getDetailsFromJikan(type, currentId, signal);
             if (!item) continue;
 
-            let newNode: Node;
+            let newNode: FullNode;
             if (type === 'anime') {
                 newNode = createAnimeNode(item as Anime);
             } else if (type === 'manga') {
@@ -32,38 +35,98 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                 continue;
             }
             newGraph.nodes.push(newNode);
+            setProgress(newGraph.nodes.length);
 
             const nodeImage = newNode.nodeType === 'anime' ? newNode.anime.nodeImage : newNode.manga.nodeImage;
             if (nodeImage) {
                 void loadTexture(newNode.id, nodeImage);
             }
 
-            if (item.relations) {
-                for (const relation of item.relations) {
-                    const relationType = relation.relation;
-                    for (const entry of relation.entry) {
-                        if (entry.type !== 'anime' && entry.type !== 'manga') continue;
-                        const sourceId = type + currentId;
-                        const targetId = entry.type + entry.mal_id;
-                        const edgeId = `${sourceId}-${targetId}`;
-                        if (newGraph.edges.find((e) => e.id === edgeId)) continue;
-                        newGraph.edges.push({
-                            source: sourceId,
-                            target: targetId,
-                            label: relationType,
-                            id: edgeId,
+            if (!item.relations) continue;
+            for (const relation of item.relations) {
+                const relationType = relation.relation;
+                for (const entry of relation.entry) {
+                    if (entry.type !== 'anime' && entry.type !== 'manga') continue;
+                    const sourceId = type + currentId;
+                    const targetId = entry.type + entry.mal_id;
+                    const edgeId = `${sourceId}-${targetId}`;
+
+                    if (newGraph.edges.find((e) => e.id === edgeId)) continue;
+                    newGraph.edges.push({
+                        source: sourceId,
+                        target: targetId,
+                        label: relationType,
+                        id: edgeId,
+                    });
+
+                    if (alreadyQueued.has(targetId)) continue;
+
+                    if (!likelyCrossoverSet.has(sourceId)) {
+                        borderQueue = borderQueue.filter((q) => q.id !== targetId);
+                        alreadyQueued.add(targetId);
+                        queue.push({
+                            type: entry.type,
+                            id: entry.mal_id.toString(),
                         });
-                        if (!alreadyQueued.has(targetId)) {
-                            alreadyQueued.add(targetId);
-                            queue.push({ type: entry.type, id: entry.mal_id.toString() });
+                        if (relationType === 'Character' || relationType === 'Other') {
+                            likelyCrossoverSet.add(targetId);
                         }
+                    } else if (!borderQueue.some((q) => q.id === targetId)) {
+                        borderQueue.push({
+                            id: targetId,
+                            title: entry.name,
+                        });
                     }
                 }
             }
         }
+
+        for (const item of borderQueue) {
+            newGraph.nodes.push({
+                id: item.id,
+                label: item.title,
+                nodeType: null,
+            });
+        }
+
         if (signal.aborted) return;
         return newGraph;
     }, []);
+
+    const deleteSubgraph = (nodeId: string) => {
+        if (!sourceId || sourceType !== 'anime' && sourceType !== 'manga') return;
+        if (nodeId === sourceType + sourceId) return;
+
+        const rootId = sourceType + sourceId;
+        const queue = [rootId];
+        const reachableNodes = new Set<string>([rootId]);
+
+        while (queue.length > 0) {
+            const currentId = queue.pop();
+            if (currentId === nodeId) continue;
+
+            for (const edge of graph.edges) {
+                if (edge.source === currentId) {
+                    if (!reachableNodes.has(edge.target) && edge.target !== nodeId) {
+                        reachableNodes.add(edge.target);
+                        queue.push(edge.target);
+                    }
+                } else if (edge.target === currentId) {
+                    if (!reachableNodes.has(edge.source) && edge.source !== nodeId) {
+                        reachableNodes.add(edge.source);
+                        queue.push(edge.source);
+                    }
+                }
+            }
+        }
+
+        setGraph((oldGraph) => ({
+            nodes: oldGraph.nodes.filter((node) => reachableNodes.has(node.id)),
+            edges: oldGraph.edges.filter(
+                (edge) => reachableNodes.has(edge.source) && reachableNodes.has(edge.target),
+            ),
+        }));
+    };
 
     useEffect(() => {
         if (!sourceId || sourceType !== 'anime' && sourceType !== 'manga') {
@@ -73,6 +136,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         setLoading(true);
         setGraph({ nodes: [], edges: [] });
         clearTextureCache();
+        setProgress(0);
 
         const controller = new AbortController();
         fetchJikanGraph(sourceType, sourceId, controller.signal)
@@ -92,5 +156,5 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         };
     }, [sourceType, sourceId, fetchJikanGraph]);
 
-    return { graph, loading };
+    return { graph, loading, progress, deleteSubgraph };
 }

@@ -7,9 +7,10 @@ import type { Graph, Node } from '@/types';
 interface Props {
     graph: Graph;
     setSelectedNode: (node: Node | null) => void;
+    deleteSubgraph: (nodeId: string) => void;
 }
 
-export function AniMapCanvas({ graph, setSelectedNode }: Props) {
+export function AniMapCanvas({ graph, setSelectedNode, deleteSubgraph }: Props) {
     const graphTheme = useMemo<Theme>(() => {
         if (typeof window === 'undefined') {
             return darkTheme;
@@ -53,6 +54,11 @@ export function AniMapCanvas({ graph, setSelectedNode }: Props) {
         };
     }, []);
 
+    const handleDoubleClick = (node: Node) => {
+        deleteSubgraph(node.id);
+        setSelectedNode(null);
+    }
+
     return (
         <div>
             <GraphCanvas
@@ -64,6 +70,7 @@ export function AniMapCanvas({ graph, setSelectedNode }: Props) {
                 layoutType="treeLr2d"
                 renderNode={({ node }) => <GraphNodeIcon node={node as unknown as Node} />}
                 onNodeClick={(node) => setSelectedNode(node as unknown as Node)}
+                onNodeDoubleClick={(node) => handleDoubleClick(node as unknown as Node)}
                 onCanvasClick={() => setSelectedNode(null)}
             />
         </div>

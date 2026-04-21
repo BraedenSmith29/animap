@@ -1,5 +1,6 @@
 import { cacheGet, cacheSet, clearExpired } from '@/utils/jikanCache.ts';
 import type { MediaType } from '@/types';
+import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 
 interface QueueItem {
     resolve: (value?: any) => void;
@@ -38,7 +39,11 @@ async function addToQueue(signal: AbortSignal, skipToFront: boolean) {
     });
 }
 
-export async function getDetailsFromJikan(type: MediaType, currentId: string, signal: AbortSignal) {
+export async function getDetailsFromJikan(
+    type: MediaType,
+    currentId: string,
+    signal: AbortSignal,
+): Promise<Anime | Manga | null> {
     const key = `animap:${type}:${currentId}`;
     const cachedData = await cacheGet(key).catch(() => null);
     if (cachedData) {

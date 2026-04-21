@@ -1,5 +1,5 @@
 import type { Anime, JikanImages, JikanResourceTitle, Manga } from '@tutkli/jikan-ts/types';
-import type { Node } from '@/types';
+import type { AnimeNode, MangaNode } from '@/types';
 
 const NSFW_GENRES = [9, 12, 49];
 
@@ -55,7 +55,7 @@ function getDurationMinutes(duration: string | null): number | null {
     return hours * 60 + minutes;
 }
 
-export function createAnimeNode(anime: Anime): Node {
+export function createAnimeNode(anime: Anime): AnimeNode {
     return {
         id: 'anime' + anime.mal_id,
         label: getTitle(anime.titles) ?? 'Unknown Anime',
@@ -83,7 +83,7 @@ export function createAnimeNode(anime: Anime): Node {
     };
 }
 
-export function createMangaNode(manga: Manga): Node {
+export function createMangaNode(manga: Manga): MangaNode {
     return {
         id: 'manga' + manga.mal_id,
         label: getTitle(manga.titles) ?? 'Unknown Manga',
