@@ -42,6 +42,12 @@ export function Icon({ className, type, color }: Props) {
                 <circle cx="19" cy="12" r="1.5" />
                 <circle cx="5" cy="12" r="1.5" />
             </svg>;
+        case 'chevron-down':
+            return <svg className={className} width="12" height="12" viewBox="0 0 24 24"
+                        fill="none" stroke={color} strokeWidth="2.5"
+                        strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9l6 6 6-6" />
+            </svg>;
         default:
             console.error('Unknown type', type);
     }

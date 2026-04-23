@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { FullNode, Graph, MediaType } from '@/types';
+import type { FullNode, Graph, MediaType, MediaTypeFilter } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { loadTexture } from '@/utils/textureCache.ts';
 import { createAnimeNode, createMangaNode } from '@/utils/jikanProcessing.ts';
 import { getDetailsFromJikan } from '@/utils/jikanClient.ts';
+import { useSearchFilter } from '@/context';
 
 export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
+    const { filter } = useSearchFilter();
+
     const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] });
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -25,7 +28,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             const { type, id: currentId } = nextItem;
 
             const item = await getDetailsFromJikan(type, currentId, signal);
-            if (!item) continue;
+            if (!item || filter.excludedMediaTypes.includes(item.type as MediaTypeFilter)) continue;
 
             let newNode: FullNode;
             if (type === 'anime') {
@@ -48,6 +51,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                 const relationType = relation.relation;
                 for (const entry of relation.entry) {
                     if (entry.type !== 'anime' && entry.type !== 'manga') continue;
+                    if (filter.category !== 'all' && filter.category !== entry.type) continue;
                     const sourceId = type + currentId;
                     const targetId = entry.type + entry.mal_id;
                     const edgeId = `${sourceId}-${targetId}`;
@@ -95,7 +99,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
 
         if (signal.aborted) return;
         return newGraph;
-    }, []);
+    }, [filter]);
 
     const deleteSubgraph = (nodeId: string) => {
         if (!sourceId || sourceType !== 'anime' && sourceType !== 'manga') return;

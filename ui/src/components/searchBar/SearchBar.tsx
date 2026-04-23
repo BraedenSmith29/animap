@@ -1,9 +1,18 @@
 import './SearchBar.css';
-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/Icon.tsx';
 import { SearchBarDropdown } from '@/components/searchBar/SearchBarDropdown.tsx';
+import { Filter } from '@/components/searchBar/filter/Filter.tsx';
 import { useNavigate } from 'react-router';
-import type { MalSearchResponse, SearchResult } from '@/types';
+import type {
+    AnimeSearchType,
+    FullSearchFilter,
+    MalSearchResponse,
+    MangaSearchType,
+    SearchResult,
+} from '@/types';
+import { useSearchFilter } from '@/context';
+import { useClickOutside } from '@/hooks';
 
 function sectionSize(tagetSectionCount: number, otherSectionCount: number) {
     const targetPerSection = 3;
@@ -14,15 +23,29 @@ function sectionSize(tagetSectionCount: number, otherSectionCount: number) {
     }
 }
 
-export function SearchBar() {
+interface Props {
+    onGraphPage?: boolean;
+}
+
+export function SearchBar({ onGraphPage = false }: Props) {
     const navigate = useNavigate();
-    const wrapperRef = useRef<HTMLDivElement>(null);
+    const wrapperRef = useClickOutside<HTMLDivElement>(useCallback(() => setOpen(false), []));
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [activeIdx, setActiveIdx] = useState(-1);
+
+    const { filter, setFilter } = useSearchFilter();
+    const [localFilter, setLocalFilter] = useState<FullSearchFilter>(filter);
+    const onFilterSave = (newFilter: FullSearchFilter, applyNow: boolean) => {
+        setLocalFilter(newFilter);
+        if (applyNow || !onGraphPage) {
+            setFilter(newFilter);
+        }
+    };
 
     useEffect(() => {
         const q = query.trim().toLowerCase();
@@ -39,11 +62,22 @@ export function SearchBar() {
 
         const timeoutId = setTimeout(async () => {
             try {
-                const newSearch: MalSearchResponse = await fetch(`/api/v1/malProxy?url=${encodeURIComponent(`https://myanimelist.net/search/prefix.json?type=all&keyword=${encodeURIComponent(q)}`)}`)
+                const searchType = localFilter.category;
+                const newSearch: MalSearchResponse = await fetch(`/api/v1/malProxy?url=${encodeURIComponent(`https://myanimelist.net/search/prefix.json?type=${searchType}&keyword=${encodeURIComponent(q)}`)}`)
                     .then(response => response.json());
 
-                const allAnimeResults = newSearch.categories.find((result) => result.type === 'anime')?.items ?? [];
-                const allMangaResults = newSearch.categories.find((result) => result.type === 'manga')?.items ?? [];
+                const allAnimeResults = newSearch.categories
+                    .find((result) => result.type === 'anime')
+                    ?.items
+                    ?.filter(item =>
+                        !item.payload?.media_type || !localFilter.excludedMediaTypes.includes(item.payload.media_type as AnimeSearchType),
+                    ) ?? [];
+                const allMangaResults = newSearch.categories
+                    .find((result) => result.type === 'manga')
+                    ?.items
+                    ?.filter(item =>
+                        !item.payload?.media_type || !localFilter.excludedMediaTypes.includes(item.payload.media_type as MangaSearchType),
+                    ) ?? [];
 
                 const animeResults: SearchResult[] = allAnimeResults
                     .slice(0, sectionSize(allAnimeResults.length, allMangaResults.length))
@@ -83,18 +117,7 @@ export function SearchBar() {
             abortController.abort();
             clearTimeout(timeoutId);
         };
-    }, [query]);
-
-    useEffect(() => {
-        function handleClick(e: MouseEvent) {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-                setOpen(false);
-            }
-        }
-
-        document.addEventListener('mousedown', handleClick);
-        return () => document.removeEventListener('mousedown', handleClick);
-    }, []);
+    }, [query, localFilter]);
 
     const selectOption = (option: SearchResult) => {
         navigate(`/${option.type}/${option.id}`);
@@ -122,28 +145,38 @@ export function SearchBar() {
 
     return <div className="search__wrapper" ref={wrapperRef}>
         <div className="search__input-row">
-            <Icon type="search" className="search__icon" />
-            <input
-                className="search__input"
-                type="text"
-                placeholder="Search anime or manga…"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                onFocus={() => setOpen(true)}
-                onKeyDown={handleKeyDown}
-                aria-label="Search anime or manga"
-                autoComplete="off"
-                spellCheck={false}
+            <Filter
+                filter={localFilter}
+                onFilterSave={onFilterSave}
+                onClose={() => inputRef.current?.focus()}
+                onGraphPage={onGraphPage}
             />
-            {query && (
-                <button
-                    className="search__clear"
-                    onClick={() => setQuery('')}
-                    aria-label="Clear search"
-                >
-                    <Icon type="close" />
-                </button>
-            )}
+            <div className="search__divider" />
+            <div className="search__input-container">
+                <Icon type="search" className="search__icon" />
+                <input
+                    ref={inputRef}
+                    className="search__input"
+                    type="text"
+                    placeholder={localFilter.category === 'all' ? 'Search anime or manga…' : `Search ${localFilter.category}…`}
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    onFocus={() => setOpen(true)}
+                    onKeyDown={handleKeyDown}
+                    aria-label={localFilter.category === 'all' ? 'Search anime or manga' : `Search ${localFilter.category}`}
+                    autoComplete="off"
+                    spellCheck={false}
+                />
+                {query && (
+                    <button
+                        className="search__clear"
+                        onClick={() => setQuery('')}
+                        aria-label="Clear search"
+                    >
+                        <Icon type="close" />
+                    </button>
+                )}
+            </div>
         </div>
         {open && query &&
             <SearchBarDropdown

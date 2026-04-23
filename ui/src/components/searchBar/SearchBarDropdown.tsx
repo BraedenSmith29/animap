@@ -42,8 +42,8 @@ export function SearchBarDropdown({ results, loading, activeIdx, setActiveIdx, s
                                 <div className="search__dropdown-item__name">{item.title}</div>
                                 <div className="search__dropdown-item__subtitle">
                                     {item.format}
-                                    {item.format && item.year && " - "}
-                                    {item.year}
+                                    {item.format && item.year ? " - " : ''}
+                                    {item.year ? item.year : ''}
                                 </div>
                             </div>
                         </div>

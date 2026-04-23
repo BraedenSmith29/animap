@@ -18,6 +18,17 @@ export interface MalSearchResponse {
     }[]
 }
 
+export type SearchFilter = 'all' | 'anime' | 'manga';
+
+export type AnimeSearchType = 'TV' | 'OVA' | 'Movie' | 'Special' | 'ONA' | 'Music' | 'CM' | 'PV' | 'TV Special';
+export type MangaSearchType = 'Manga' | 'Novel' | 'Light Novel' | 'One-shot' | 'Doujinshi' | 'Manhua' | 'Manhwa';
+export type MediaTypeFilter = AnimeSearchType | MangaSearchType;
+
+export interface FullSearchFilter {
+    category: SearchFilter;
+    excludedMediaTypes: MediaTypeFilter[];
+}
+
 export interface SearchResult {
     id: number;
     title: string | null;

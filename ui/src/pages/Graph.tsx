@@ -31,7 +31,7 @@ export function Graph() {
     return <>
         <div className="graph__header">
             <Link to="/" className="graph__header-title">Ani<span>Map</span></Link>
-            <SearchBar />
+            <SearchBar onGraphPage={true} />
         </div>
         {loading
             ? <LoadingScreen progress={progress} />
