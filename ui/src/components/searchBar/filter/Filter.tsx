@@ -1,6 +1,6 @@
 import './Filter.css';
 import { useCallback, useEffect, useState } from 'react';
-import { Icon, Button } from '@/components';
+import { Icon } from '@/components/Icon.tsx';
 import type { AnimeSearchType, FullSearchFilter, MangaSearchType, SearchFilter } from '@/types';
 import { useClickOutside } from '@/hooks';
 import { DEFAULT_FILTER } from '@/context/SearchFilterContext.tsx';
@@ -56,15 +56,13 @@ export function Filter({ filter, onFilterSave, onClose, onGraphPage }: FilterPro
                         <div className="filter__filter-label">Category</div>
                         <div className="filter__filter-options">
                             {CATEGORIES.map((category) => (
-                                <Button
+                                <button
                                     key={category}
-                                    variant={localFilter.category === category ? 'primary' : 'secondary'}
-                                    size="medium"
-                                    className="filter__filter-btn"
+                                    className={`filter__filter-btn ${localFilter.category === category ? 'filter__filter-btn--active' : ''}`}
                                     onClick={() => setLocalFilter(prev => ({ ...prev, category: category }))}
                                 >
                                     {category.charAt(0).toUpperCase() + category.slice(1)}
-                                </Button>
+                                </button>
                             ))}
                         </div>
                     </div>
@@ -87,18 +85,14 @@ export function Filter({ filter, onFilterSave, onClose, onGraphPage }: FilterPro
                     )}
 
                     <div className="filter__filter-actions">
-                        <Button
-                            variant="secondary"
-                            size="medium"
+                        <button
                             className="filter__filter-action-btn"
                             onClick={() => setLocalFilter(DEFAULT_FILTER)}
                         >
                             Reset Filters
-                        </Button>
-                        <Button
-                            variant="primary"
-                            size="medium"
-                            className="filter__filter-action-btn"
+                        </button>
+                        <button
+                            className="filter__filter-action-btn filter__filter-action-btn--primary"
                             disabled={hasError}
                             onClick={() => {
                                 onFilterSave(localFilter, !onGraphPage);
@@ -107,12 +101,10 @@ export function Filter({ filter, onFilterSave, onClose, onGraphPage }: FilterPro
                             }}
                         >
                             Save Filters
-                        </Button>
+                        </button>
                         {onGraphPage && (
-                            <Button
-                                variant="secondary"
-                                size="medium"
-                                className="filter__filter-action-btn--full"
+                            <button
+                                className="filter__filter-action-btn filter__filter-action-btn--full"
                                 disabled={hasError}
                                 onClick={() => {
                                     onFilterSave(localFilter, true);
@@ -120,7 +112,7 @@ export function Filter({ filter, onFilterSave, onClose, onGraphPage }: FilterPro
                                 }}
                             >
                                 Save and Apply to Graph
-                            </Button>
+                            </button>
                         )}
                     </div>
                 </div>
