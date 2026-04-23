@@ -10,13 +10,13 @@
     box-sizing: border-box;
 }
 
-.medium-btn {
+.btn--medium {
     padding: 0.6rem;
     border-radius: 8px;
     font-size: 0.85rem;
 }
 
-.large-btn {
+.btn--large {
     padding: 0.65rem 0.85rem;
     border-radius: 10px;
     font-size: 0.95rem;

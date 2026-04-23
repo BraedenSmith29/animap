@@ -2,41 +2,47 @@ import React from 'react';
 import './Button.css';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'danger';
-    size?: 'medium' | 'large';
-    className?: string;
-    href?: string;
-    children: React.ReactNode;
+    href?: never
 }
 
-export function Button({
-    variant = 'secondary',
-    size = 'medium',
-    href,
-    children,
-    className = '',
-    ...props
-}: ButtonProps) {
-    const sizeClass = `${size}-btn`;
-    const classNames = `btn btn--${variant} ${sizeClass} ${className}`.trim();
+interface AnchorProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+    href: string
+}
 
-    if (href) {
+type Props = (ButtonProps | AnchorProps) & {
+    variant?: 'primary' | 'secondary' | 'danger';
+    size?: 'medium' | 'large';
+};
+
+export function Button(props: Props) {
+    const {
+        variant = 'secondary',
+        size = 'medium',
+        children,
+        className = '',
+    } = props;
+
+    const classNames = `btn btn--${variant} btn--${size} ${className}`.trim();
+
+    if (props.href !== undefined) {
+        const { href, ...rest } = props;
         return (
             <a
                 href={href}
                 className={classNames}
                 target="_blank"
                 rel="noopener noreferrer"
-                {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+                {...rest}
             >
                 {children}
             </a>
         );
+    } else {
+        const { href: _href, ...rest } = props;
+        return (
+            <button type="button" className={classNames} {...rest}>
+                {children}
+            </button>
+        );
     }
-
-    return (
-        <button className={classNames} {...props}>
-            {children}
-        </button>
-    );
 }
