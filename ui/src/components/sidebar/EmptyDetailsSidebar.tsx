@@ -33,7 +33,7 @@ export function EmptyDetailsSidebar({ node, isClosing, onClose, onClosed, onDele
                     <Icon type="close" />
                 </button>
                 <p className="sidebar__heading">Details</p>
-                <div ref={menuRef} style={{ display: 'contents' }}>
+                <div ref={menuRef}>
                     <button
                         type="button"
                         className="sidebar__header-button"
@@ -79,11 +79,10 @@ export function EmptyDetailsSidebar({ node, isClosing, onClose, onClosed, onDele
                     <p>This was not loaded because it appears to be related by a crossover and may not actually be a part of this series. If it is a part of the series, you can load the subgraph. Otherwise, you can delete the node or simply leave it as is.</p>
                 </div>
 
-                <div className="sidebar__actions" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
+                <div className="sidebar__actions">
                     <button
                         type="button"
                         className="sidebar__button sidebar__button--primary"
-                        // style={{ backgroundColor: 'var(--color-accent-primary)', color: 'var(--color-bg-primary)', border: 'none' }}
                         onClick={() => {
                             onClose();
                             onExpand(node.mediaType, node.malId);
@@ -94,7 +93,6 @@ export function EmptyDetailsSidebar({ node, isClosing, onClose, onClosed, onDele
                     <button
                         type="button"
                         className="sidebar__button sidebar__button--danger"
-                        style={{ borderColor: '#ff4d4d', color: '#ff4d4d' }}
                         onClick={() => {
                             onClose();
                             onDelete(node.id);

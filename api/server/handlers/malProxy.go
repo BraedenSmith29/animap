@@ -16,6 +16,8 @@ const (
 	maxResponseBodyBytes = 10 << 20 // 10 MiB
 )
 
+var client = &http.Client{Timeout: proxyTimeout}
+
 func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -44,7 +46,6 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &http.Client{Timeout: proxyTimeout}
 	resp, err := client.Get(parsedURL.String())
 	if err != nil {
 		var netErr net.Error
@@ -71,6 +72,10 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 	// Copy content-type header from the fetched response
 	if contentType := resp.Header.Get("Content-Type"); contentType != "" {
 		w.Header().Set("Content-Type", contentType)
+	}
+	// Copy cache-control header from the fetched response
+	if cacheControl := resp.Header.Get("Cache-Control"); cacheControl != "" {
+		w.Header().Set("Cache-Control", cacheControl)
 	}
 
 	// Cap upstream response size to avoid unbounded reads.

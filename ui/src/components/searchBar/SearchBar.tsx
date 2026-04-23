@@ -23,6 +23,11 @@ function sectionSize(tagetSectionCount: number, otherSectionCount: number) {
     }
 }
 
+function buildMalProxyUrl(searchType: string, query: string) {
+    const url = `https://myanimelist.net/search/prefix.json?type=${searchType}&keyword=${encodeURIComponent(query)}`;
+    return `/api/v1/malProxy?url=${encodeURIComponent(url)}`;
+}
+
 interface Props {
     onGraphPage?: boolean;
 }
@@ -63,8 +68,10 @@ export function SearchBar({ onGraphPage = false }: Props) {
         const timeoutId = setTimeout(async () => {
             try {
                 const searchType = localFilter.category;
-                const newSearch: MalSearchResponse = await fetch(`/api/v1/malProxy?url=${encodeURIComponent(`https://myanimelist.net/search/prefix.json?type=${searchType}&keyword=${encodeURIComponent(q)}`)}`)
-                    .then(response => response.json());
+                const newSearch: MalSearchResponse = await fetch(
+                    buildMalProxyUrl(searchType, q),
+                    { signal: abortController.signal }
+                ).then(response => response.json());
 
                 const allAnimeResults = newSearch.categories
                     .find((result) => result.type === 'anime')

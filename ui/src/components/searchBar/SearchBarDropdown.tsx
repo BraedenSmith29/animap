@@ -1,4 +1,4 @@
-import type { MediaType, SearchResult } from '@/types';
+import type { SearchResult } from '@/types';
 
 interface Props {
     results: SearchResult[];
@@ -12,12 +12,12 @@ export function SearchBarDropdown({ results, loading, activeIdx, setActiveIdx, s
     const animeResults = results.filter((r) => r.type === 'anime');
     const mangaResults = results.filter((r) => r.type === 'manga');
 
-    const renderSection = (title: string, items: SearchResult[], startIndex: number, type: MediaType) => {
+    const renderSection = (title: string, items: SearchResult[], startIndex: number) => {
         if (items.length === 0) return null;
 
         return (
             <>
-                <div className={`search__dropdown-header search__dropdown-header--${type}`}>{title}</div>
+                <div className="search__dropdown-header">{title}</div>
                 {items.map((item, idx) => {
                     const globalIdx = startIndex + idx;
                     return (
@@ -64,8 +64,8 @@ export function SearchBarDropdown({ results, loading, activeIdx, setActiveIdx, s
                 <div className="search__dropdown-empty">No results found</div>
             ) : (
                 <>
-                    {renderSection('Anime', animeResults, 0, 'anime')}
-                    {renderSection('Manga', mangaResults, animeResults.length, 'manga')}
+                    {renderSection('Anime', animeResults, 0)}
+                    {renderSection('Manga', mangaResults, animeResults.length)}
                 </>
             )}
         </div>

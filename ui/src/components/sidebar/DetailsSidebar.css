@@ -252,6 +252,13 @@
     margin-top: 0.5rem;
 }
 
+.sidebar__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
 .sidebar__chips {
     display: flex;
     flex-wrap: wrap;

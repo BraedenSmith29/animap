@@ -92,7 +92,7 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed, onDel
                     <Icon type="close" />
                 </button>
                 <p className="sidebar__heading">Details</p>
-                <div ref={menuRef} style={{ display: 'contents' }}>
+                <div ref={menuRef}>
                     <button
                         type="button"
                         className="sidebar__header-button"
