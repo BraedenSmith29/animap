@@ -4,10 +4,11 @@ import { AniMapCanvas, DetailsSidebar, SearchBar } from '@/components';
 import { useJikanGraph } from '@/hooks';
 import type { Node } from '@/types';
 import { Link, useParams } from 'react-router';
+import { LoadingScreen } from '@/components/loadingScreen/LoadingScreen.tsx';
 
 export function Graph() {
     const { type, id } = useParams();
-    const { graph, loading } = useJikanGraph(type, id);
+    const { graph, loading, progress, deleteSubgraph, expandGraph } = useJikanGraph(type, id);
     const [selectedNode, setSelectedNode] = useState<Node | null>(null);
     const [isSidebarClosing, setIsSidebarClosing] = useState(false);
 
@@ -30,14 +31,12 @@ export function Graph() {
     return <>
         <div className="graph__header">
             <Link to="/" className="graph__header-title">Ani<span>Map</span></Link>
-            <SearchBar />
+            <SearchBar onGraphPage={true} />
         </div>
-        {loading ? (
-            <div className="graph__loading-overlay">
-                <div className="graph__loading-spinner" />
-                <p>Building your anime relationship map...</p>
-            </div>
-        ) : <AniMapCanvas graph={graph} setSelectedNode={handleSelectedNode} />}
+        {loading
+            ? <LoadingScreen progress={progress} />
+            : <AniMapCanvas graph={graph} setSelectedNode={handleSelectedNode} />
+        }
         {selectedNode && (
             <DetailsSidebar
                 node={selectedNode}
@@ -47,6 +46,8 @@ export function Graph() {
                     setSelectedNode(null);
                     setIsSidebarClosing(false);
                 }}
+                deleteSubgraph={deleteSubgraph}
+                expandGraph={expandGraph}
             />
         )}
     </>;

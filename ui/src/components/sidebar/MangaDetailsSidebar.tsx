@@ -1,12 +1,15 @@
+import { useCallback, useState } from 'react';
 import './DetailsSidebar.css';
 import type { Manga } from '@/types';
 import { Icon } from '@/components/Icon.tsx';
+import { useClickOutside } from '@/hooks';
 
 type Props = {
     manga: Manga;
     isClosing: boolean;
     onClose: () => void;
     onClosed: () => void;
+    onDelete: (nodeId: string) => void;
 };
 
 const formatEnumValue = (value?: string | null) => {
@@ -37,7 +40,9 @@ const formatMonthYear = (value?: string | null) => {
 const formatNumber = (value?: number | null) => (typeof value === 'number' ? value.toLocaleString() : '-');
 const formatNumericValue = (value?: number | null) => (typeof value === 'number' && !Number.isNaN(value) ? value : '-');
 
-export function MangaDetailsSidebar({ manga, isClosing, onClose, onClosed }: Props) {
+export function MangaDetailsSidebar({ manga, isClosing, onClose, onClosed, onDelete }: Props) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useClickOutside<HTMLDivElement>(useCallback(() => setIsMenuOpen(false), []));
     const coverUrl = manga.portraitImage || '';
     const title = manga.title || 'Untitled Manga';
     const subtitle = manga.enTitle || manga.jaTitle || 'No alternate title available';
@@ -58,13 +63,37 @@ export function MangaDetailsSidebar({ manga, isClosing, onClose, onClosed }: Pro
             }}
         >
             <div className="sidebar__header">
-                <button type="button" className="sidebar__button" onClick={onClose} aria-label="Close sidebar">
+                <button type="button" className="sidebar__header-button" onClick={onClose} aria-label="Close sidebar">
                     <Icon type="close" />
                 </button>
                 <p className="sidebar__heading">Details</p>
-                <button type="button" className="sidebar__button" aria-label="Options">
-                    <Icon type="dots-three" />
-                </button>
+                <div ref={menuRef}>
+                    <button
+                        type="button"
+                        className="sidebar__header-button"
+                        aria-label="Options"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    >
+                        <Icon type="dots-three" />
+                    </button>
+
+                    {isMenuOpen && (
+                        <div className="sidebar__menu">
+                            <button
+                                type="button"
+                                className="sidebar__menu-item sidebar__menu-item--danger"
+                                onClick={() => {
+                                    setIsMenuOpen(false);
+                                    onClose();
+                                    onDelete(`manga${manga.malId}`);
+                                }}
+                            >
+                                <Icon type="close" />
+                                Delete Node
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="sidebar__content">
@@ -77,7 +106,7 @@ export function MangaDetailsSidebar({ manga, isClosing, onClose, onClosed }: Pro
                 </div>
 
                 <a
-                    className="sidebar__mal-link"
+                    className="sidebar__button sidebar__button--secondary"
                     href={`https://myanimelist.net/manga/${manga.malId}`}
                     target="_blank"
                     rel="noopener noreferrer"

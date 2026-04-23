@@ -1,21 +1,56 @@
 import './SearchBar.css';
-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/Icon.tsx';
 import { SearchBarDropdown } from '@/components/searchBar/SearchBarDropdown.tsx';
+import { Filter } from '@/components/searchBar/filter/Filter.tsx';
 import { useNavigate } from 'react-router';
-import { getEnglishTitle, getJapaneseTitle, getPortraitImage, getTitle } from '@/utils/jikanProcessing.ts';
-import type { SearchResult } from '@/types';
-import { searchJikan } from '@/utils/jikanClient.ts';
+import type {
+    AnimeSearchType,
+    FullSearchFilter,
+    MalSearchResponse,
+    MangaSearchType,
+    SearchResult,
+} from '@/types';
+import { useSearchFilter } from '@/context';
+import { useClickOutside } from '@/hooks';
 
-export function SearchBar() {
+function sectionSize(tagetSectionCount: number, otherSectionCount: number) {
+    const targetPerSection = 3;
+    if (otherSectionCount >= targetPerSection) {
+        return Math.min(tagetSectionCount, targetPerSection);
+    } else {
+        return Math.min(tagetSectionCount, targetPerSection * 2 - otherSectionCount);
+    }
+}
+
+function buildMalProxyUrl(searchType: string, query: string) {
+    const url = `https://myanimelist.net/search/prefix.json?type=${searchType}&keyword=${encodeURIComponent(query)}`;
+    return `/api/v1/malProxy?url=${encodeURIComponent(url)}`;
+}
+
+interface Props {
+    onGraphPage?: boolean;
+}
+
+export function SearchBar({ onGraphPage = false }: Props) {
     const navigate = useNavigate();
-    const wrapperRef = useRef<HTMLDivElement>(null);
+    const wrapperRef = useClickOutside<HTMLDivElement>(useCallback(() => setOpen(false), []));
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [activeIdx, setActiveIdx] = useState(-1);
+
+    const { filter, setFilter } = useSearchFilter();
+    const [localFilter, setLocalFilter] = useState<FullSearchFilter>(filter);
+    const onFilterSave = (newFilter: FullSearchFilter, applyNow: boolean) => {
+        setLocalFilter(newFilter);
+        if (applyNow || !onGraphPage) {
+            setFilter(newFilter);
+        }
+    };
 
     useEffect(() => {
         const q = query.trim().toLowerCase();
@@ -32,32 +67,43 @@ export function SearchBar() {
 
         const timeoutId = setTimeout(async () => {
             try {
-                const [animeData, mangaData] = await Promise.all([
-                    searchJikan('anime', q, abortController.signal),
-                    searchJikan('manga', q, abortController.signal),
-                ]);
+                const searchType = localFilter.category;
+                const newSearch: MalSearchResponse = await fetch(
+                    buildMalProxyUrl(searchType, q),
+                    { signal: abortController.signal }
+                ).then(response => response.json());
 
-                const animeResults: SearchResult[] =
-                    (animeData || []).filter((r1, i, self) => {
-                        return self.findIndex((r2) => r2.mal_id === r1.mal_id) === i;
-                    }).map((item) => ({
-                        id: item.mal_id,
-                        title: getTitle(item.titles),
-                        enTitle: getEnglishTitle(item.titles),
-                        jaTitle: getJapaneseTitle(item.titles),
-                        portraitImage: getPortraitImage(item.images),
+                const allAnimeResults = newSearch.categories
+                    .find((result) => result.type === 'anime')
+                    ?.items
+                    ?.filter(item =>
+                        !item.payload?.media_type || !localFilter.excludedMediaTypes.includes(item.payload.media_type as AnimeSearchType),
+                    ) ?? [];
+                const allMangaResults = newSearch.categories
+                    .find((result) => result.type === 'manga')
+                    ?.items
+                    ?.filter(item =>
+                        !item.payload?.media_type || !localFilter.excludedMediaTypes.includes(item.payload.media_type as MangaSearchType),
+                    ) ?? [];
+
+                const animeResults: SearchResult[] = allAnimeResults
+                    .slice(0, sectionSize(allAnimeResults.length, allMangaResults.length))
+                    .map((item): SearchResult => ({
+                        id: item.id,
+                        title: item.name,
+                        portraitImage: item.image_url ?? null,
+                        format: item.payload?.media_type ?? null,
+                        year: item.payload?.start_year ?? null,
                         type: 'anime',
                     }));
-
-                const mangaResults: SearchResult[] =
-                    (mangaData || []).filter((r1, i, self) => {
-                        return self.findIndex((r2) => r2.mal_id === r1.mal_id) === i;
-                    }).map((item) => ({
-                        id: item.mal_id,
-                        title: getTitle(item.titles),
-                        enTitle: getEnglishTitle(item.titles),
-                        jaTitle: getJapaneseTitle(item.titles),
-                        portraitImage: getPortraitImage(item.images),
+                const mangaResults: SearchResult[] = allMangaResults
+                    .slice(0, sectionSize(allMangaResults.length, allAnimeResults.length))
+                    .map((item): SearchResult => ({
+                        id: item.id,
+                        title: item.name,
+                        portraitImage: item.image_url ?? null,
+                        format: item.payload?.media_type ?? null,
+                        year: item.payload?.start_year ?? null,
                         type: 'manga',
                     }));
 
@@ -78,18 +124,7 @@ export function SearchBar() {
             abortController.abort();
             clearTimeout(timeoutId);
         };
-    }, [query]);
-
-    useEffect(() => {
-        function handleClick(e: MouseEvent) {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-                setOpen(false);
-            }
-        }
-
-        document.addEventListener('mousedown', handleClick);
-        return () => document.removeEventListener('mousedown', handleClick);
-    }, []);
+    }, [query, localFilter]);
 
     const selectOption = (option: SearchResult) => {
         navigate(`/${option.type}/${option.id}`);
@@ -117,28 +152,38 @@ export function SearchBar() {
 
     return <div className="search__wrapper" ref={wrapperRef}>
         <div className="search__input-row">
-            <Icon type="search" className="search__icon" />
-            <input
-                className="search__input"
-                type="text"
-                placeholder="Search anime or manga…"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                onFocus={() => setOpen(true)}
-                onKeyDown={handleKeyDown}
-                aria-label="Search anime or manga"
-                autoComplete="off"
-                spellCheck={false}
+            <Filter
+                filter={localFilter}
+                onFilterSave={onFilterSave}
+                onClose={() => inputRef.current?.focus()}
+                onGraphPage={onGraphPage}
             />
-            {query && (
-                <button
-                    className="search__clear"
-                    onClick={() => setQuery('')}
-                    aria-label="Clear search"
-                >
-                    <Icon type="close" />
-                </button>
-            )}
+            <div className="search__divider" />
+            <div className="search__input-container">
+                <Icon type="search" className="search__icon" />
+                <input
+                    ref={inputRef}
+                    className="search__input"
+                    type="text"
+                    placeholder={localFilter.category === 'all' ? 'Search anime or manga…' : `Search ${localFilter.category}…`}
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    onFocus={() => setOpen(true)}
+                    onKeyDown={handleKeyDown}
+                    aria-label={localFilter.category === 'all' ? 'Search anime or manga' : `Search ${localFilter.category}`}
+                    autoComplete="off"
+                    spellCheck={false}
+                />
+                {query && (
+                    <button
+                        className="search__clear"
+                        onClick={() => setQuery('')}
+                        aria-label="Clear search"
+                    >
+                        <Icon type="close" />
+                    </button>
+                )}
+            </div>
         </div>
         {open && query &&
             <SearchBarDropdown

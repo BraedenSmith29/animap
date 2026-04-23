@@ -1,0 +1,201 @@
+.filter__type-selector {
+    position: relative;
+    padding: 0.35rem 0;
+    flex-shrink: 0;
+}
+
+.filter__type-trigger {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.filter__type-trigger:hover,
+.filter__type-trigger--active {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.filter__type-icon {
+    transition: transform 0.2s ease;
+    opacity: 0.6;
+}
+
+.filter__type-icon--rotated {
+    transform: rotate(180deg);
+}
+
+.filter__filter-popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: 12px;
+    padding: 1.25rem;
+    min-width: 280px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+@media (max-width: 480px) {
+    .filter__filter-popup {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        min-width: 0;
+        border-radius: 20px 20px 0 0;
+        padding-bottom: 2rem;
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+}
+
+.filter__filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.filter__filter-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    letter-spacing: 0.05em;
+}
+
+.filter__filter-options {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter__filter-btn {
+    flex: 1;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-primary);
+    color: var(--color-text-secondary);
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.filter__filter-btn:hover {
+    background: var(--color-border-primary);
+    color: var(--color-text-primary);
+}
+
+.filter__filter-btn--active {
+    background: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+    color: var(--color-bg-primary);
+}
+
+.filter__filter-btn--active:hover {
+    filter: brightness(1.1);
+    background: var(--color-accent-primary);
+}
+
+.filter__filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.filter__filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    padding: 0.25rem 0;
+    transition: color 0.15s;
+    user-select: none;
+}
+
+.filter__filter-checkbox:hover {
+    color: var(--color-text-primary);
+}
+
+.filter__filter-checkbox input {
+    cursor: pointer;
+    accent-color: var(--color-accent-primary);
+}
+
+.filter__filter-error {
+    color: var(--color-text-danger);
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: -0.25rem;
+}
+
+.filter__filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: -0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border-primary);
+}
+
+.filter__filter-action-btn {
+    flex: 1;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-primary);
+    color: var(--color-text-primary);
+    padding: 0.6rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.filter__filter-action-btn:hover:not(:disabled) {
+    background: var(--color-border-primary);
+}
+
+.filter__filter-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.filter__filter-action-btn--primary {
+    background: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+    color: var(--color-bg-primary);
+}
+
+.filter__filter-action-btn--primary:hover:not(:disabled) {
+    filter: brightness(1.1);
+    background: var(--color-accent-primary);
+}
+
+.filter__filter-action-btn--full {
+    flex: 1 0 100%;
+}

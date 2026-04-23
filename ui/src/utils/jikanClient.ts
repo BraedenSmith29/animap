@@ -1,6 +1,6 @@
-import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { cacheGet, cacheSet, clearExpired } from '@/utils/jikanCache.ts';
 import type { MediaType } from '@/types';
+import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 
 interface QueueItem {
     resolve: (value?: any) => void;
@@ -39,7 +39,11 @@ async function addToQueue(signal: AbortSignal, skipToFront: boolean) {
     });
 }
 
-export async function getDetailsFromJikan(type: MediaType, currentId: string, signal: AbortSignal) {
+export async function getDetailsFromJikan(
+    type: MediaType,
+    currentId: string,
+    signal: AbortSignal,
+): Promise<Anime | Manga | null> {
     const key = `animap:${type}:${currentId}`;
     const cachedData = await cacheGet(key).catch(() => null);
     if (cachedData) {
@@ -77,37 +81,6 @@ export async function getDetailsFromJikan(type: MediaType, currentId: string, si
                 data: body.data,
             }).catch(console.error);
             return body.data;
-        }
-    }
-}
-
-export async function searchJikan(type: MediaType, query: string, signal: AbortSignal) {
-    await addToQueue(signal, true);
-    while (true) {
-        let response;
-        try {
-            response = await fetch(
-                `https://api.jikan.moe/v4/${type}?q=${encodeURIComponent(query)}&limit=3`,
-                { signal },
-            );
-        } catch (error) {
-            if (error instanceof Error && error.name === 'AbortError') {
-                return null;
-            } else {
-                throw error;
-            }
-        }
-
-        if (response.status === 429) {
-            await addToQueue(signal, true);
-            continue;
-        }
-
-        if (!response.ok) {
-            throw new Error(response.statusText);
-        } else {
-            const body = await response.json();
-            return body.data as Anime[] | Manga[];
         }
     }
 }

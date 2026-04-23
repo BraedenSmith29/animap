@@ -1,5 +1,5 @@
 .home {
-    min-height: 100vh;
+    margin-top: 25vh;
     background-color: var(--color-bg-primary);
     display: flex;
     flex-direction: column;
@@ -60,4 +60,10 @@
 .home__github:hover {
     color: var(--color-text-primary);
     background: var(--color-bg-secondary);
+}
+
+@media (max-height: 1200px) {
+    .home {
+        margin-top: 0;
+    }
 }

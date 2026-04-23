@@ -9,6 +9,6 @@ import (
 func NewRouter() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/health", handlers.HandleGetHealth)
-	mux.HandleFunc("/api/v1/fetchImage", handlers.HandleFetchImage)
+	mux.HandleFunc("/api/v1/malProxy", handlers.HandleMalProxy)
 	return mux
 }

@@ -3,14 +3,17 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import { Graph, Home } from '@/pages';
 import { BrowserRouter, Route, Routes } from 'react-router';
+import { SearchFilterProvider } from '@/context';
 
 createRoot(document.getElementById('app')!).render(
     <StrictMode>
-        <BrowserRouter>
-            <Routes>
-                <Route index element={<Home />} />
-                <Route path=":type/:id" element={<Graph />} />
-            </Routes>
-        </BrowserRouter>
+        <SearchFilterProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route index element={<Home />} />
+                    <Route path=":type/:id" element={<Graph />} />
+                </Routes>
+            </BrowserRouter>
+        </SearchFilterProvider>
     </StrictMode>,
 );
