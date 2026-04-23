@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import './DetailsSidebar.css';
 import type { EmptyNode, MediaType } from '@/types';
-import { Icon } from '@/components/Icon.tsx';
+import { Icon, Button } from '@/components';
 import { useClickOutside } from '@/hooks';
 
 type Props = {
@@ -63,14 +63,14 @@ export function EmptyDetailsSidebar({ node, isClosing, onClose, onClosed, onDele
             </div>
 
             <div className="sidebar__content">
-                <a
-                    className="sidebar__button sidebar__button--secondary"
+                <Button
+                    variant="secondary"
+                    size="large"
+                    className="sidebar__button"
                     href={`https://myanimelist.net/${node.mediaType}/${node.malId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
                 >
                     View on MyAnimeList
-                </a>
+                </Button>
 
                 <h2 className="sidebar__title">{title}</h2>
                 <p className="sidebar__subtitle">{typeLabel}</p>
@@ -80,26 +80,28 @@ export function EmptyDetailsSidebar({ node, isClosing, onClose, onClosed, onDele
                 </div>
 
                 <div className="sidebar__actions">
-                    <button
-                        type="button"
-                        className="sidebar__button sidebar__button--primary"
+                    <Button
+                        variant="primary"
+                        size="large"
+                        className="sidebar__button"
                         onClick={() => {
                             onClose();
                             onExpand(node.mediaType, node.malId);
                         }}
                     >
                         Load Subgraph
-                    </button>
-                    <button
-                        type="button"
-                        className="sidebar__button sidebar__button--danger"
+                    </Button>
+                    <Button
+                        variant="danger"
+                        size="large"
+                        className="sidebar__button"
                         onClick={() => {
                             onClose();
                             onDelete(node.id);
                         }}
                     >
                         Delete Node
-                    </button>
+                    </Button>
                 </div>
             </div>
         </aside>
