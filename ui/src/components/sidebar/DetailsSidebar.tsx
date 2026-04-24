@@ -15,7 +15,7 @@ type Props = {
 export function DetailsSidebar({ node, isClosing, onClose, onClosed, deleteSubgraph, expandGraph }: Props) {
     if (node.nodeType === 'anime') {
         return <AnimeDetailsSidebar
-            anime={node.anime}
+            anime={node.data}
             isClosing={isClosing}
             onClose={onClose}
             onClosed={onClosed}
@@ -23,7 +23,7 @@ export function DetailsSidebar({ node, isClosing, onClose, onClosed, deleteSubgr
         />;
     } else if (node.nodeType === 'manga') {
         return <MangaDetailsSidebar
-            manga={node.manga}
+            manga={node.data}
             isClosing={isClosing}
             onClose={onClose}
             onClosed={onClosed}

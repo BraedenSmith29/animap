@@ -49,12 +49,12 @@ export interface BaseNode {
 
 export interface AnimeNode extends BaseNode {
     nodeType: 'anime';
-    anime: Anime;
+    data: Anime;
 }
 
 export interface MangaNode extends BaseNode {
     nodeType: 'manga';
-    manga: Manga;
+    data: Manga;
 }
 
 export interface EmptyNode extends BaseNode {

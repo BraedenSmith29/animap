@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { FullNode, Graph, MediaType, MediaTypeFilter } from '@/types';
+import type { Edge, FullNode, Graph, MediaType, MediaTypeFilter, Node } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { loadTexture } from '@/utils/textureCache.ts';
 import { createAnimeNode, createMangaNode } from '@/utils/jikanProcessing.ts';
@@ -14,8 +14,9 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
     const [progress, setProgress] = useState(0);
     const abortControllersRef = useRef<Set<AbortController>>(new Set<AbortController>());
 
-    const fetchJikanGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal, existingNodes: string[] = []) => {
-        const newGraph: Graph = { nodes: [], edges: [] };
+    const fetchJikanGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal, existingNodes: string[] = []): Promise<Graph | void> => {
+        const newNodes: Node[] = [];
+        const newEdges = new Map<string, Edge>();
         const queue: { type: MediaType, id: string }[] = [{ type: sourceType, id: sourceId }];
         const alreadyQueued: Set<string> = new Set([sourceType + sourceId, ...existingNodes]);
         let borderQueue: { type: MediaType, id: string, title: string }[] = [];
@@ -38,12 +39,11 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             } else {
                 continue;
             }
-            newGraph.nodes.push(newNode);
-            setProgress(newGraph.nodes.length);
+            newNodes.push(newNode);
+            setProgress(newNodes.length);
 
-            const nodeImage = newNode.nodeType === 'anime' ? newNode.anime.nodeImage : newNode.manga.nodeImage;
-            if (nodeImage) {
-                void loadTexture(newNode.id, nodeImage);
+            if (newNode.data.nodeImage) {
+                void loadTexture(newNode.id, newNode.data.nodeImage);
             }
 
             if (!item.relations) continue;
@@ -56,13 +56,24 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                     const targetId = entry.type + entry.mal_id;
                     const edgeId = `${sourceId}-${targetId}`;
 
-                    if (newGraph.edges.find((e) => e.id === edgeId)) continue;
-                    newGraph.edges.push({
+                    if (newEdges.has(edgeId)) continue;
+                    newEdges.set(edgeId, {
                         source: sourceId,
                         target: targetId,
                         label: relationType,
                         id: edgeId,
                     });
+
+                    const targetNode = newNodes.find((n) => n.id === targetId);
+                    if (targetNode && targetNode.nodeType && newEdges.has(`${targetId}-${sourceId}`)) {
+                        const sourceStartDate = newNode.data.startDate ?? '9999-99-99';
+                        const targetStartDate = targetNode.data.startDate ?? '9999-99-99';
+                        if (targetStartDate < sourceStartDate) {
+                            newEdges.delete(edgeId);
+                        } else if (targetStartDate > sourceStartDate) {
+                            newEdges.delete(`${targetId}-${sourceId}`);
+                        }
+                    }
 
                     if (alreadyQueued.has(targetId)) continue;
 
@@ -88,7 +99,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         }
 
         for (const item of borderQueue) {
-            newGraph.nodes.push({
+            newNodes.push({
                 id: item.type + item.id,
                 label: item.title,
                 nodeType: null,
@@ -98,7 +109,10 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         }
 
         if (signal.aborted) return;
-        return newGraph;
+        return {
+            nodes: newNodes,
+            edges: Array.from(newEdges.values()),
+        };
     }, [filter]);
 
     const deleteSubgraph = (nodeId: string) => {
@@ -195,7 +209,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                 c.abort();
             }
             abortControllersRef.current.clear();
-        }
+        };
     }, [sourceType, sourceId, fetchJikanGraph]);
 
     return { graph, loading, progress, deleteSubgraph, expandGraph };
