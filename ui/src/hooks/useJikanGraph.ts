@@ -174,11 +174,6 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         setGraph({ nodes: [], edges: [] });
         setProgress(0);
 
-        for (const c of abortControllersRef.current) {
-            c.abort();
-        }
-        abortControllersRef.current.clear();
-
         const controller = new AbortController();
         abortControllersRef.current.add(controller);
         fetchJikanGraph(sourceType, sourceId, controller.signal)
@@ -193,6 +188,14 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                     setLoading(false);
                 }
             });
+
+        return () => {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            for (const c of abortControllersRef.current) {
+                c.abort();
+            }
+            abortControllersRef.current.clear();
+        }
     }, [sourceType, sourceId, fetchJikanGraph]);
 
     return { graph, loading, progress, deleteSubgraph, expandGraph };

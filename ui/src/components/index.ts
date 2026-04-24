@@ -1,4 +1,4 @@
-export * from './button/Button.tsx';
+export * from './button';
 export * from './AniMapCanvas.tsx';
 export * from './Icon.tsx';
 export * from './nodeIcon/GraphNodeIcon.tsx';
