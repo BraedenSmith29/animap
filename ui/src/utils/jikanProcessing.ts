@@ -41,6 +41,11 @@ export function getJapaneseTitle(titles: JikanResourceTitle[]): string | null {
     return titles.find(t => t.type === 'Japanese')?.title ?? null;
 }
 
+function stripDate(date: string | null): string | null {
+    if (!date) return null;
+    return date.split('T')[0];
+}
+
 function isNsfw(item: Anime | Manga): boolean {
     return item.genres.find(g => NSFW_GENRES.includes(g.mal_id)) !== undefined;
 }
@@ -60,15 +65,15 @@ export function createAnimeNode(anime: Anime): AnimeNode {
         id: 'anime' + anime.mal_id,
         label: getTitle(anime.titles) ?? 'Unknown Anime',
         nodeType: 'anime',
-        anime: {
+        data: {
             malId: anime.mal_id.toString(),
             title: getTitle(anime.titles),
             enTitle: getEnglishTitle(anime.titles),
             jaTitle: getJapaneseTitle(anime.titles),
             portraitImage: getPortraitImage(anime.images),
             nodeImage: getNodeImage(anime.images),
-            startDate: anime.aired.from,
-            endDate: anime.aired.to,
+            startDate: stripDate(anime.aired.from),
+            endDate: stripDate(anime.aired.to),
             synopsis: anime.synopsis,
             score: anime.score,
             members: anime.members,
@@ -88,15 +93,15 @@ export function createMangaNode(manga: Manga): MangaNode {
         id: 'manga' + manga.mal_id,
         label: getTitle(manga.titles) ?? 'Unknown Manga',
         nodeType: 'manga',
-        manga: {
+        data: {
             malId: manga.mal_id.toString(),
             title: getTitle(manga.titles),
             enTitle: getEnglishTitle(manga.titles),
             jaTitle: getJapaneseTitle(manga.titles),
             portraitImage: getPortraitImage(manga.images),
             nodeImage: getNodeImage(manga.images),
-            startDate: manga.published.from,
-            endDate: manga.published.to,
+            startDate: stripDate(manga.published.from),
+            endDate: stripDate(manga.published.to),
             synopsis: manga.synopsis,
             score: manga.score,
             members: manga.members,

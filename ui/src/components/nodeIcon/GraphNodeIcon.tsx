@@ -14,11 +14,8 @@ export function GraphNodeIcon({ node }: Props) {
     const [texture, setTexture] = useState<THREE.Texture | null>(null);
 
     useEffect(() => {
-        if (node.nodeType) {
-            const nodeImage = node.nodeType === 'anime' ? node.anime.nodeImage : node.manga.nodeImage;
-            if (nodeImage) {
-                loadTexture(node.id, nodeImage).then(setTexture);
-            }
+        if (node.nodeType && node.data.nodeImage) {
+            loadTexture(node.id, node.data.nodeImage).then(setTexture);
         }
     }, [node]);
 

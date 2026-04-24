@@ -60,7 +60,6 @@ export function AniMapCanvas({ graph, setSelectedNode }: Props) {
                 theme={graphTheme}
                 labelType="all"
                 draggable={true}
-                layoutType="treeLr2d"
                 renderNode={({ node }) => <GraphNodeIcon node={node as unknown as Node} />}
                 onNodeClick={(node) => setSelectedNode(node as unknown as Node)}
                 onCanvasClick={() => setSelectedNode(null)}
