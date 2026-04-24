@@ -25,7 +25,7 @@ export function Graph() {
     };
 
     useEffect(() => {
-        handleSelectedNode(null);
+        setIsSidebarClosing(true);
     }, [type, id]);
 
     return <>

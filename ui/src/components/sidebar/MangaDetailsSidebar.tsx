@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import './DetailsSidebar.css';
 import type { Manga } from '@/types';
-import { Icon, Button } from '@/components';
+import { Icon } from '@/components/Icon';
+import { Button } from '@/components/button';
 import { useClickOutside } from '@/hooks';
 
 type Props = {
