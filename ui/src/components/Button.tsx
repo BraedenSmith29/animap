@@ -28,11 +28,11 @@ export function Button(props: Props) {
         const { href, ...rest } = props;
         return (
             <a
-                href={href}
-                className={classNames}
                 target="_blank"
                 rel="noopener noreferrer"
                 {...rest}
+                href={href}
+                className={classNames}
             >
                 {children}
             </a>
@@ -40,7 +40,7 @@ export function Button(props: Props) {
     } else {
         const { href: _href, ...rest } = props;
         return (
-            <button type="button" className={classNames} {...rest}>
+            <button type="button" {...rest} className={classNames}>
                 {children}
             </button>
         );
