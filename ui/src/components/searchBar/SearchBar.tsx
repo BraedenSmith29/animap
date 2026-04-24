@@ -123,6 +123,7 @@ export function SearchBar({ onGraphPage = false }: Props) {
 
     const selectOption = (option: SearchResult) => {
         navigate(`/${option.type}/${option.id}`);
+        setFilter(localFilter);
         setOpen(false);
         setQuery('');
         setResults([]);
