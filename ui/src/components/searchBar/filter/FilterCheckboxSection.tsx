@@ -26,7 +26,7 @@ export function FilterCheckboxSection({ entries, label, localFilter, setLocalFil
                                     ...prev,
                                     excludedMediaTypes: !checked
                                         ? [...prev.excludedMediaTypes, entry]
-                                        : prev.excludedMediaTypes.filter(t => t !== entry)
+                                        : prev.excludedMediaTypes.filter(t => t !== entry),
                                 }));
                             }}
                         />
@@ -36,9 +36,10 @@ export function FilterCheckboxSection({ entries, label, localFilter, setLocalFil
             </div>
             {allUnchecked && (
                 <div className="filter__filter-error">
-                    At least one type must be selected. If you want to exclude the whole category, select the other on at the top.
+                    At least one type must be selected. If you want to exclude the whole category, select the other on
+                    at the top.
                 </div>
             )}
         </div>
-    )
+    );
 }

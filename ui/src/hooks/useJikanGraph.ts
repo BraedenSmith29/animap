@@ -4,7 +4,7 @@ import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { loadTexture } from '@/utils/textureCache.ts';
 import { createAnimeNode, createMangaNode } from '@/utils/jikanProcessing.ts';
 import { getDetailsFromJikan } from '@/utils/jikanClient.ts';
-import { useSearchFilter } from '@/context';
+import { useSearchFilter } from '@/context/searchFilter';
 
 export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
     const { filter } = useSearchFilter();
@@ -15,8 +15,8 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
     const abortControllersRef = useRef<Set<AbortController>>(new Set<AbortController>());
 
     const fetchJikanGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal, existingNodes: string[] = []) => {
-        let newGraph: Graph = { nodes: [], edges: [] };
-        let queue: { type: MediaType, id: string }[] = [{ type: sourceType, id: sourceId }];
+        const newGraph: Graph = { nodes: [], edges: [] };
+        const queue: { type: MediaType, id: string }[] = [{ type: sourceType, id: sourceId }];
         const alreadyQueued: Set<string> = new Set([sourceType + sourceId, ...existingNodes]);
         let borderQueue: { type: MediaType, id: string, title: string }[] = [];
         const likelyCrossoverSet: Set<string> = new Set<string>();
@@ -174,6 +174,11 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         setGraph({ nodes: [], edges: [] });
         setProgress(0);
 
+        for (const c of abortControllersRef.current) {
+            c.abort();
+        }
+        abortControllersRef.current.clear();
+
         const controller = new AbortController();
         abortControllersRef.current.add(controller);
         fetchJikanGraph(sourceType, sourceId, controller.signal)
@@ -188,12 +193,6 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                     setLoading(false);
                 }
             });
-
-        return () => {
-            for (const c of abortControllersRef.current) {
-                c.abort();
-            }
-        };
     }, [sourceType, sourceId, fetchJikanGraph]);
 
     return { graph, loading, progress, deleteSubgraph, expandGraph };

@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import './DetailsSidebar.css';
 import type { EmptyNode, MediaType } from '@/types';
-import { Icon, Button } from '@/components';
+import { Icon } from '@/components/Icon';
+import { Button } from '@/components/button';
 import { useClickOutside } from '@/hooks';
 
 type Props = {
@@ -76,7 +77,9 @@ export function EmptyDetailsSidebar({ node, isClosing, onClose, onClosed, onDele
                 <p className="sidebar__subtitle">{typeLabel}</p>
 
                 <div className="sidebar__meta-card">
-                    <p>This was not loaded because it appears to be related by a crossover and may not actually be a part of this series. If it is a part of the series, you can load the subgraph. Otherwise, you can delete the node or simply leave it as is.</p>
+                    <p>This was not loaded because it appears to be related by a crossover and may not actually be a
+                        part of this series. If it is a part of the series, you can load the subgraph. Otherwise, you
+                        can delete the node or simply leave it as is.</p>
                 </div>
 
                 <div className="sidebar__actions">

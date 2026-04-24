@@ -2,11 +2,11 @@ import React from 'react';
 import './Button.css';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    href?: never
+    href?: never;
 }
 
 interface AnchorProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-    href: string
+    href: string;
 }
 
 type Props = (ButtonProps | AnchorProps) & {

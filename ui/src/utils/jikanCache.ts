@@ -1,5 +1,12 @@
+import type { Anime, Manga } from '@tutkli/jikan-ts/types';
+
 const DB_NAME = 'animap-db';
 const STORE_NAME = 'jikan-cache';
+
+interface CacheEntry {
+    data: Anime | Manga;
+    expiration: number;
+}
 
 const getDB = (): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {
@@ -17,7 +24,7 @@ const getDB = (): Promise<IDBDatabase> => {
 
 export const cacheGet = async (key: string) => {
     const db = await getDB();
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<CacheEntry>((resolve, reject) => {
         const transaction = db.transaction(STORE_NAME, 'readonly');
         const store = transaction.objectStore(STORE_NAME);
         const request = store.get(key);
@@ -26,7 +33,7 @@ export const cacheGet = async (key: string) => {
     });
 };
 
-export const cacheSet = async (key: string, value: any) => {
+export const cacheSet = async (key: string, value: CacheEntry) => {
     const db = await getDB();
     return new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(STORE_NAME, 'readwrite');

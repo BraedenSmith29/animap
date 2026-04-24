@@ -7,7 +7,7 @@ interface MalItem {
     payload?: {
         media_type?: string | null;
         start_year?: number | null;
-    }
+    };
     // There's more, but this is all I care about
 }
 
@@ -15,7 +15,7 @@ export interface MalSearchResponse {
     categories: {
         type: string;
         items: MalItem[]
-    }[]
+    }[];
 }
 
 export type SearchFilter = 'all' | 'anime' | 'manga';

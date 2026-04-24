@@ -3,14 +3,14 @@ import type { MediaType } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 
 interface QueueItem {
-    resolve: (value?: any) => void;
+    resolve: () => void;
     signal: AbortSignal;
 }
 
 let processing = false;
 const queue: QueueItem[] = [];
 
-async function startRunner()  {
+async function startRunner() {
     if (processing) return;
     processing = true;
 
@@ -78,7 +78,7 @@ export async function getDetailsFromJikan(
             const body = await response.json();
             await cacheSet(key, {
                 expiration: Date.now() + 1000 * 60 * 60 * 24 * 7,
-                data: body.data,
+                data: body.data as Anime | Manga,
             }).catch(console.error);
             return body.data;
         }

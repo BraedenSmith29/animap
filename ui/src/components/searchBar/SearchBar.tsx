@@ -4,14 +4,8 @@ import { Icon } from '@/components/Icon.tsx';
 import { SearchBarDropdown } from '@/components/searchBar/SearchBarDropdown.tsx';
 import { Filter } from '@/components/searchBar/filter/Filter.tsx';
 import { useNavigate } from 'react-router';
-import type {
-    AnimeSearchType,
-    FullSearchFilter,
-    MalSearchResponse,
-    MangaSearchType,
-    SearchResult,
-} from '@/types';
-import { useSearchFilter } from '@/context';
+import type { AnimeSearchType, FullSearchFilter, MalSearchResponse, MangaSearchType, SearchResult } from '@/types';
+import { useSearchFilter } from '@/context/searchFilter';
 import { useClickOutside } from '@/hooks';
 
 function sectionSize(tagetSectionCount: number, otherSectionCount: number) {
@@ -34,7 +28,6 @@ interface Props {
 
 export function SearchBar({ onGraphPage = false }: Props) {
     const navigate = useNavigate();
-    const wrapperRef = useClickOutside<HTMLDivElement>(useCallback(() => setOpen(false), []));
     const inputRef = useRef<HTMLInputElement>(null);
 
     const [query, setQuery] = useState('');
@@ -42,6 +35,8 @@ export function SearchBar({ onGraphPage = false }: Props) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [activeIdx, setActiveIdx] = useState(-1);
+
+    const wrapperRef = useClickOutside<HTMLDivElement>(useCallback(() => setOpen(false), []));
 
     const { filter, setFilter } = useSearchFilter();
     const [localFilter, setLocalFilter] = useState<FullSearchFilter>(filter);
@@ -70,7 +65,7 @@ export function SearchBar({ onGraphPage = false }: Props) {
                 const searchType = localFilter.category;
                 const newSearch: MalSearchResponse = await fetch(
                     buildMalProxyUrl(searchType, q),
-                    { signal: abortController.signal }
+                    { signal: abortController.signal },
                 ).then(response => response.json());
 
                 const allAnimeResults = newSearch.categories

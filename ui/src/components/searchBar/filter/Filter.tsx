@@ -1,9 +1,10 @@
 import './Filter.css';
 import { useCallback, useEffect, useState } from 'react';
-import { Icon, Button } from '@/components';
+import { Icon } from '@/components/Icon';
+import { Button } from '@/components/button';
 import type { AnimeSearchType, FullSearchFilter, MangaSearchType, SearchFilter } from '@/types';
 import { useClickOutside } from '@/hooks';
-import { DEFAULT_FILTER } from '@/context/SearchFilterContext.tsx';
+import { DEFAULT_FILTER } from '@/context/searchFilter';
 import { FilterCheckboxSection } from '@/components/searchBar/filter/FilterCheckboxSection.tsx';
 
 const CATEGORIES: SearchFilter[] = ['all', 'anime', 'manga'];
@@ -14,7 +15,7 @@ interface FilterProps {
     filter: FullSearchFilter;
     onFilterSave: (filter: FullSearchFilter, applyNow: boolean) => void;
     onClose?: () => void;
-    onGraphPage: boolean
+    onGraphPage: boolean;
 }
 
 export function Filter({ filter, onFilterSave, onClose, onGraphPage }: FilterProps) {
