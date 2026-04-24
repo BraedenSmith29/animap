@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import './DetailsSidebar.css';
 import type { Anime } from '@/types';
-import { Icon } from '@/components/Icon.tsx';
+import { Icon, Button } from '@/components';
 import { useClickOutside } from '@/hooks';
 
 type Props = {
@@ -130,14 +130,14 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed, onDel
                     )}
                 </div>
 
-                <a
-                    className="sidebar__button sidebar__button--secondary"
+                <Button
+                    variant="secondary"
+                    size="large"
+                    className="sidebar__button"
                     href={`https://myanimelist.net/anime/${anime.malId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
                 >
                     View on MyAnimeList
-                </a>
+                </Button>
 
                 <h2 className="sidebar__title">{title}</h2>
                 <p className="sidebar__subtitle">{subtitle}</p>

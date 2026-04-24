@@ -92,31 +92,6 @@
 
 .filter__filter-btn {
     flex: 1;
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border-primary);
-    color: var(--color-text-secondary);
-    padding: 0.5rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.filter__filter-btn:hover {
-    background: var(--color-border-primary);
-    color: var(--color-text-primary);
-}
-
-.filter__filter-btn--active {
-    background: var(--color-accent-primary);
-    border-color: var(--color-accent-primary);
-    color: var(--color-bg-primary);
-}
-
-.filter__filter-btn--active:hover {
-    filter: brightness(1.1);
-    background: var(--color-accent-primary);
 }
 
 .filter__filter-grid {
@@ -164,36 +139,6 @@
 
 .filter__filter-action-btn {
     flex: 1;
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border-primary);
-    color: var(--color-text-primary);
-    padding: 0.6rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-}
-
-.filter__filter-action-btn:hover:not(:disabled) {
-    background: var(--color-border-primary);
-}
-
-.filter__filter-action-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.filter__filter-action-btn--primary {
-    background: var(--color-accent-primary);
-    border-color: var(--color-accent-primary);
-    color: var(--color-bg-primary);
-}
-
-.filter__filter-action-btn--primary:hover:not(:disabled) {
-    filter: brightness(1.1);
-    background: var(--color-accent-primary);
 }
 
 .filter__filter-action-btn--full {
