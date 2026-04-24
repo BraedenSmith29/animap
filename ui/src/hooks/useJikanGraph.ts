@@ -64,14 +64,16 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                         id: edgeId,
                     });
 
-                    const targetNode = newNodes.find((n) => n.id === targetId);
-                    if (targetNode && targetNode.nodeType && newEdges.has(`${targetId}-${sourceId}`)) {
-                        const sourceStartDate = newNode.data.startDate ?? '9999-99-99';
-                        const targetStartDate = targetNode.data.startDate ?? '9999-99-99';
-                        if (targetStartDate < sourceStartDate) {
-                            newEdges.delete(edgeId);
-                        } else if (targetStartDate > sourceStartDate) {
-                            newEdges.delete(`${targetId}-${sourceId}`);
+                    if (newEdges.has(`${targetId}-${sourceId}`)) {
+                        const targetNode = newNodes.find((n) => n.id === targetId);
+                        if (targetNode && targetNode.nodeType) {
+                            const sourceStartDate = newNode.data.startDate ?? '9999-99-99';
+                            const targetStartDate = targetNode.data.startDate ?? '9999-99-99';
+                            if (targetStartDate < sourceStartDate) {
+                                newEdges.delete(edgeId);
+                            } else if (targetStartDate > sourceStartDate) {
+                                newEdges.delete(`${targetId}-${sourceId}`);
+                            }
                         }
                     }
 
