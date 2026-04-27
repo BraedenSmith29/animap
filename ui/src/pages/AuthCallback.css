@@ -1,0 +1,38 @@
+.auth-callback {
+    height: 100vh;
+}
+
+.auth-callback__error-title {
+    color: var(--color-text-danger);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.auth-callback__error-message {
+    max-width: 300px;
+    margin-bottom: 2rem;
+}
+
+.auth-callback__loading-message {
+    margin-top: 1rem;
+}
+
+.loading__overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: 2rem;
+    justify-content: center;
+}
+
+.loading__spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--color-border-primary);
+    border-top-color: var(--color-accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}

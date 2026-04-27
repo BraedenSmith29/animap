@@ -46,7 +46,18 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := client.Get(parsedURL.String())
+	req, err := http.NewRequest(http.MethodGet, parsedURL.String(), nil)
+	if err != nil {
+		http.Error(w, "failed to create the proxy request", http.StatusInternalServerError)
+		return
+	}
+
+	// Try to get access token from header
+	if accessTokenCookie := r.Header.Get("Authorization"); accessTokenCookie != "" {
+		req.Header.Set("Authorization", accessTokenCookie)
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		var netErr net.Error
 		if errors.As(err, &netErr) && netErr.Timeout() {
