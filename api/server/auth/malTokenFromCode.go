@@ -35,8 +35,20 @@ func HandleMalTokenFromCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{Name: "state", Value: "", Path: "/", MaxAge: -1})
-	http.SetCookie(w, &http.Cookie{Name: "code_verifier", Value: "", Path: "/", MaxAge: -1})
+	http.SetCookie(w, &http.Cookie{
+		Name:   "code_verifier",
+		Value:  "",
+		Path:   "/",
+		Secure: os.Getenv("APP_ENV") == "PROD",
+		MaxAge: -1,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:   "state",
+		Value:  "",
+		Path:   "/",
+		Secure: os.Getenv("APP_ENV") == "PROD",
+		MaxAge: -1,
+	})
 
 	malClientId := os.Getenv("MAL_CLIENT_ID")
 	if malClientId == "" {

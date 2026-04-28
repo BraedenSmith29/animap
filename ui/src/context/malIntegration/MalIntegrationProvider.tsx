@@ -95,11 +95,12 @@ export function MalIntegrationProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const fetchTokenFromRefresh = useCallback(async () => {
-        return fetch('/auth/malRefresh')
-            .then(response => response.json())
-            .then(data => {
-                handleNewAccessToken(data.access_token, data.expires_in);
-            });
+        const response = await fetch('/auth/malRefresh');
+        if (!response.ok) {
+            throw new Error('Failed to refresh token');
+        }
+        const data = await response.json();
+        handleNewAccessToken(data.access_token, data.expires_in);
     }, []);
 
     useEffect(() => {
@@ -114,7 +115,7 @@ export function MalIntegrationProvider({ children }: { children: ReactNode }) {
             const timeout = setTimeout(() => {
                 fetchTokenFromRefresh()
                     .catch(error => console.error('Error fetching token from refresh:', error));
-            }, expiresIn);
+            }, expiresIn * 1000 - 60000);
             return () => clearTimeout(timeout);
         }
     }, [accessToken, expiresIn, fetchTokenFromRefresh]);

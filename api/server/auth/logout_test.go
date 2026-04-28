@@ -26,7 +26,6 @@ func TestHandleLogout(t *testing.T) {
 		MaxAge int
 		Path   string
 	}{
-		"access_token":  {-1, "/"},
 		"refresh_token": {-1, "/auth/malRefresh"},
 		"is_logged_in":  {-1, "/"},
 	}

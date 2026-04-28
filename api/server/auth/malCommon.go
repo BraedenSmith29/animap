@@ -48,7 +48,7 @@ func handleMalTokenResponse(w http.ResponseWriter, response *http.Response) {
 		Value:    "true",
 		Path:     "/",
 		HttpOnly: false,
-		Secure:   false,
+		Secure:   os.Getenv("APP_ENV") == "PROD",
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   31 * 24 * 60 * 60, // 31 days
 	})

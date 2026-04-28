@@ -28,8 +28,24 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	codeChallenge := codeVerifier
 
-	http.SetCookie(w, &http.Cookie{Name: "code_verifier", Value: codeVerifier, Path: "/", HttpOnly: true, SameSite: http.SameSiteLaxMode})
-	http.SetCookie(w, &http.Cookie{Name: "state", Value: state, Path: "/", HttpOnly: true, SameSite: http.SameSiteLaxMode})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "code_verifier",
+		Value:    codeVerifier,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   os.Getenv("APP_ENV") == "PROD",
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   5 * 60, // 5 minutes
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "state",
+		Value:    state,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   os.Getenv("APP_ENV") == "PROD",
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   5 * 60, // 5 minutes
+	})
 
 	malTokenUrl, err := getMalTokenUrl(state, codeChallenge)
 	if err != nil {
