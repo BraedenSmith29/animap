@@ -3,12 +3,13 @@ import { MalIntegrationContext } from './MalIntegrationContext';
 import type { ListItem, MalListPage } from '@/types/list.ts';
 import type { MediaType } from '@/types';
 
-const authenticatedFetch = async (url: string, accessToken: string, signal: AbortSignal) => {
+const authenticatedFetch = async (url: string, accessToken: string, init: RequestInit) => {
     return fetch(`/api/v1/malProxy?url=${encodeURIComponent(url)}`, {
+        ...init,
         headers: {
+            ...init.headers,
             Authorization: `Bearer ${accessToken}`,
         },
-        signal,
     });
 };
 
@@ -17,7 +18,7 @@ const fetchSubList = async (mediaType: MediaType, accessToken: string, signal: A
 
     let nextFetch = `https://api.myanimelist.net/v2/users/@me/${mediaType}list?fields=list_status&limit=1000`;
     while (nextFetch) {
-        await authenticatedFetch(nextFetch, accessToken, signal)
+        await authenticatedFetch(nextFetch, accessToken, { signal })
             .then(response => response.json())
             .then((data: MalListPage) => {
                 newList.push(...data.data.map(entry => ({
@@ -118,8 +119,34 @@ export function MalIntegrationProvider({ children }: { children: ReactNode }) {
         }
     }, [accessToken, expiresIn, fetchTokenFromRefresh]);
 
+    const addToList = useCallback(async (mediaType: MediaType, id: string) => {
+        if (!accessToken) return false;
+
+        const newStatus = mediaType === 'anime' ? 'plan_to_watch' : 'plan_to_read';
+        const url = `https://api.myanimelist.net/v2/${mediaType}/${id}/my_list_status?status=${newStatus}`;
+        const requestInit = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ status: newStatus }).toString(),
+        };
+
+        const ok = await authenticatedFetch(url, accessToken, requestInit)
+            .then(response => response.ok);
+
+        if (ok) {
+            setAnimangaList(prevList => [...prevList, {
+                id: mediaType + id,
+                status: newStatus,
+            }]);
+        }
+
+        return ok;
+    }, [accessToken]);
+
     return (
-        <MalIntegrationContext.Provider value={{ fetchTokenFromCode, isAuthenticated, login, logout, animangaList }}>
+        <MalIntegrationContext.Provider
+            value={{ fetchTokenFromCode, isAuthenticated, login, logout, animangaList, addToList }}
+        >
             {children}
         </MalIntegrationContext.Provider>
     );

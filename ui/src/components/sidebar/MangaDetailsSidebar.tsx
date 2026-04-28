@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import './DetailsSidebar.css';
 import type { Manga } from '@/types';
 import { Icon } from '@/components/Icon';
 import { Button } from '@/components/button';
 import { useClickOutside } from '@/hooks';
+import { useMalIntegration } from '@/context/malIntegration';
 
 type Props = {
     manga: Manga;
@@ -42,11 +43,16 @@ const formatNumber = (value?: number | null) => (typeof value === 'number' ? val
 const formatNumericValue = (value?: number | null) => (typeof value === 'number' && !Number.isNaN(value) ? value : '-');
 
 export function MangaDetailsSidebar({ manga, isClosing, onClose, onClosed, onDelete }: Props) {
+    const { isAuthenticated, animangaList, addToList } = useMalIntegration();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useClickOutside<HTMLDivElement>(useCallback(() => setIsMenuOpen(false), []));
     const coverUrl = manga.portraitImage || '';
     const title = manga.title || 'Untitled Manga';
     const subtitle = manga.enTitle || manga.jaTitle || 'No alternate title available';
+
+    const inList = useMemo(() => {
+        return animangaList.some((item) => item.id === 'manga' + manga.malId);
+    }, [animangaList, manga.malId]);
 
     const infoChips = [
         manga.nsfw ? 'NSFW' : null,
@@ -114,6 +120,17 @@ export function MangaDetailsSidebar({ manga, isClosing, onClose, onClosed, onDel
                 >
                     View on MyAnimeList
                 </Button>
+
+                {isAuthenticated() && !inList && (
+                    <Button
+                        variant="primary"
+                        size="large"
+                        className="sidebar__button"
+                        onClick={() => addToList('manga', manga.malId)}
+                    >
+                        Add to List
+                    </Button>
+                )}
 
                 <h2 className="sidebar__title">{title}</h2>
                 <p className="sidebar__subtitle">{subtitle}</p>
