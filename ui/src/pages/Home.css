@@ -10,6 +10,10 @@
     position: relative;
 }
 
+.home__auth {
+    margin-top: 20px;
+}
+
 /* ── Title ────────────────────────────────────────────── */
 .home__title {
     font-size: 4rem;

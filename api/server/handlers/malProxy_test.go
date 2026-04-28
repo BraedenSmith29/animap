@@ -17,12 +17,6 @@ func TestHandleMalProxyValidation(t *testing.T) {
 		statusCode int
 	}{
 		{
-			name:       "rejects non get",
-			method:     http.MethodPost,
-			target:     "/api/v1/malProxy?url=http://myanimelist.net/image.jpg",
-			statusCode: http.StatusMethodNotAllowed,
-		},
-		{
 			name:       "requires url",
 			method:     http.MethodGet,
 			target:     "/api/v1/malProxy",

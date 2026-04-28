@@ -19,11 +19,6 @@ const (
 var client = &http.Client{Timeout: proxyTimeout}
 
 func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	targetUrl := r.URL.Query().Get("url")
 	if targetUrl == "" {
 		http.Error(w, "url query parameter is required", http.StatusBadRequest)
@@ -46,7 +41,23 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := client.Get(parsedURL.String())
+	req, err := http.NewRequest(r.Method, parsedURL.String(), r.Body)
+	if err != nil {
+		http.Error(w, "failed to create the proxy request", http.StatusInternalServerError)
+		return
+	}
+
+	// Try to get access token from header
+	if accessTokenHeader := r.Header.Get("Authorization"); accessTokenHeader != "" {
+		req.Header.Set("Authorization", accessTokenHeader)
+	}
+
+	// Try to get content type from header
+	if contextTypeHeader := r.Header.Get("Content-Type"); contextTypeHeader != "" {
+		req.Header.Set("Content-Type", contextTypeHeader)
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		var netErr net.Error
 		if errors.As(err, &netErr) && netErr.Timeout() {

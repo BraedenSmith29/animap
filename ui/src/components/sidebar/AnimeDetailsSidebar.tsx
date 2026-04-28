@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import './DetailsSidebar.css';
 import type { Anime } from '@/types';
 import { Icon } from '@/components/Icon';
 import { Button } from '@/components/button';
 import { useClickOutside } from '@/hooks';
+import { useMalIntegration } from '@/context/malIntegration';
 
 type Props = {
     anime: Anime;
@@ -65,11 +66,16 @@ const formatRuntime = (totalMinutes: number | null) => {
 };
 
 export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed, onDelete }: Props) {
+    const { isAuthenticated, animangaList, addToList } = useMalIntegration();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useClickOutside<HTMLDivElement>(useCallback(() => setIsMenuOpen(false), []));
     const coverUrl = anime.portraitImage || '';
     const title = anime.title || 'Untitled Anime';
     const subtitle = anime.enTitle || anime.jaTitle || 'No alternate title available';
+
+    const inList = useMemo(() => {
+        return animangaList.some((item) => item.id === 'anime' + anime.malId);
+    }, [animangaList, anime.malId]);
 
     const infoChips = [
         formatEnumValue(anime.source),
@@ -139,6 +145,17 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed, onDel
                 >
                     View on MyAnimeList
                 </Button>
+
+                {isAuthenticated() && !inList && (
+                    <Button
+                        variant="primary"
+                        size="large"
+                        className="sidebar__button"
+                        onClick={() => addToList('anime', anime.malId)}
+                    >
+                        Add to List
+                    </Button>
+                )}
 
                 <h2 className="sidebar__title">{title}</h2>
                 <p className="sidebar__subtitle">{subtitle}</p>
