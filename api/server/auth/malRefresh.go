@@ -15,12 +15,25 @@ func HandleMalRefresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	malClientId := os.Getenv("MAL_CLIENT_ID")
+	if malClientId == "" {
+		log.Println("MAL_CLIENT_ID environment variable is not set")
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	malClientSecret := os.Getenv("MAL_CLIENT_SECRET")
+	if malClientSecret == "" {
+		log.Println("MAL_CLIENT_SECRET environment variable is not set")
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	form := url.Values{}
-	form.Set("client_id", os.Getenv("MAL_CLIENT_ID"))
-	form.Set("client_secret", os.Getenv("MAL_CLIENT_SECRET"))
+	form.Set("client_id", malClientId)
+	form.Set("client_secret", malClientSecret)
 	form.Set("grant_type", "refresh_token")
 	form.Set("refresh_token", refreshTokenCookie.Value)
-	response, err := http.PostForm("https://myanimelist.net/v1/oauth2/token", form)
+	response, err := http.PostForm(os.Getenv("MAL_BASE_URL")+"/v1/oauth2/token", form)
 	if err != nil {
 		http.Error(w, "failed to exchange refresh token for an access token", http.StatusInternalServerError)
 		return
