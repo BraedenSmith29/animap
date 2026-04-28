@@ -2,7 +2,8 @@ package auth
 
 import (
 	"net/http"
-	"os"
+
+	"github.com/braedensmith29/animap/server/env"
 )
 
 func HandleLogout(w http.ResponseWriter, r *http.Request) {
@@ -10,14 +11,14 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 		Name:   "refresh_token",
 		Value:  "",
 		Path:   "/auth/malRefresh",
-		Secure: os.Getenv("APP_ENV") == "PROD",
+		Secure: env.IsProd(),
 		MaxAge: -1,
 	})
 	http.SetCookie(w, &http.Cookie{
 		Name:   "is_logged_in",
 		Value:  "",
 		Path:   "/",
-		Secure: os.Getenv("APP_ENV") == "PROD",
+		Secure: env.IsProd(),
 		MaxAge: -1,
 	})
 

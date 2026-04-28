@@ -5,7 +5,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
+
+	"github.com/braedensmith29/animap/server/env"
 )
 
 func HandleMalTokenFromCode(w http.ResponseWriter, r *http.Request) {
@@ -39,44 +40,25 @@ func HandleMalTokenFromCode(w http.ResponseWriter, r *http.Request) {
 		Name:   "code_verifier",
 		Value:  "",
 		Path:   "/",
-		Secure: os.Getenv("APP_ENV") == "PROD",
+		Secure: env.IsProd(),
 		MaxAge: -1,
 	})
 	http.SetCookie(w, &http.Cookie{
 		Name:   "state",
 		Value:  "",
 		Path:   "/",
-		Secure: os.Getenv("APP_ENV") == "PROD",
+		Secure: env.IsProd(),
 		MaxAge: -1,
 	})
 
-	malClientId := os.Getenv("MAL_CLIENT_ID")
-	if malClientId == "" {
-		log.Println("MAL_CLIENT_ID environment variable is not set")
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	malClientSecret := os.Getenv("MAL_CLIENT_SECRET")
-	if malClientSecret == "" {
-		log.Println("MAL_CLIENT_SECRET environment variable is not set")
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	malRedirectUri := os.Getenv("MAL_REDIRECT_URI")
-	if malRedirectUri == "" {
-		log.Println("MAL_REDIRECT_URI environment variable is not set")
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-
 	form := url.Values{}
-	form.Set("client_id", malClientId)
-	form.Set("client_secret", malClientSecret)
+	form.Set("client_id", env.MustGet("MAL_CLIENT_ID"))
+	form.Set("client_secret", env.MustGet("MAL_CLIENT_SECRET"))
 	form.Set("grant_type", "authorization_code")
 	form.Set("code", code)
-	form.Set("redirect_uri", malRedirectUri)
+	form.Set("redirect_uri", env.MustGet("MAL_REDIRECT_URI"))
 	form.Set("code_verifier", codeVerifier.Value)
-	response, err := http.PostForm(os.Getenv("MAL_BASE_URL")+"/v1/oauth2/token", form)
+	response, err := http.PostForm(env.MustGet("MAL_BASE_URL")+"/v1/oauth2/token", form)
 	if err != nil {
 		http.Error(w, "failed to exchange code for an access token", http.StatusInternalServerError)
 		return

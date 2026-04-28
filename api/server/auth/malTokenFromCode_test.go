@@ -4,17 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 )
 
 func TestHandleMalTokenFromCode(t *testing.T) {
-	os.Setenv("MAL_CLIENT_ID", "test_client_id")
-	os.Setenv("MAL_CLIENT_SECRET", "test_client_secret")
-	os.Setenv("MAL_REDIRECT_URI", "test_redirect_uri")
-	defer os.Unsetenv("MAL_CLIENT_ID")
-	defer os.Unsetenv("MAL_CLIENT_SECRET")
-	defer os.Unsetenv("MAL_REDIRECT_URI")
+	t.Setenv("APP_ENV", "TEST")
+	t.Setenv("MAL_CLIENT_ID", "test_client_id")
+	t.Setenv("MAL_CLIENT_SECRET", "test_client_secret")
+	t.Setenv("MAL_REDIRECT_URI", "test_redirect_uri")
 
 	// Mock MAL server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -47,8 +44,7 @@ func TestHandleMalTokenFromCode(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	os.Setenv("MAL_BASE_URL", ts.URL)
-	defer os.Unsetenv("MAL_BASE_URL")
+	t.Setenv("MAL_BASE_URL", ts.URL)
 
 	req := httptest.NewRequest("GET", "/auth/callback?code=test_code&state=test_state", nil)
 	req.AddCookie(&http.Cookie{Name: "state", Value: "test_state"})

@@ -5,14 +5,12 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 )
 
 func TestHandleMalTokenResponse(t *testing.T) {
-	os.Setenv("APP_ENV", "LOCAL")
-	defer os.Unsetenv("APP_ENV")
+	t.Setenv("APP_ENV", "TEST")
 
 	w := httptest.NewRecorder()
 	tokenResponse := MalTokenResponse{

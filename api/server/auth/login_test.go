@@ -4,18 +4,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"testing"
 )
 
 func TestHandleLogin(t *testing.T) {
-	// Set environment variables
-	os.Setenv("MAL_BASE_URL", "https://myanimelist.net")
-	os.Setenv("MAL_CLIENT_ID", "test_client_id")
-	os.Setenv("MAL_REDIRECT_URI", "http://localhost:3000/callback")
-	defer os.Unsetenv("MAL_BASE_URL")
-	defer os.Unsetenv("MAL_CLIENT_ID")
-	defer os.Unsetenv("MAL_REDIRECT_URI")
+	t.Setenv("APP_ENV", "TEST")
+	t.Setenv("MAL_BASE_URL", "https://myanimelist.net")
+	t.Setenv("MAL_CLIENT_ID", "test_client_id")
+	t.Setenv("MAL_REDIRECT_URI", "http://localhost:3000/callback")
 
 	req := httptest.NewRequest("GET", "/auth/login", nil)
 	rr := httptest.NewRecorder()

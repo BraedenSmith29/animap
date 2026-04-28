@@ -7,6 +7,8 @@ import (
 )
 
 func TestHandleLogout(t *testing.T) {
+	t.Setenv("APP_ENV", "TEST")
+
 	req := httptest.NewRequest("GET", "/auth/logout", nil)
 	rr := httptest.NewRecorder()
 

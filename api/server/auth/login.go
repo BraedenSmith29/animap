@@ -3,10 +3,10 @@ package auth
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"net/http"
 	"net/url"
-	"os"
+
+	"github.com/braedensmith29/animap/server/env"
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +33,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		Value:    codeVerifier,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   os.Getenv("APP_ENV") == "PROD",
+		Secure:   env.IsProd(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   5 * 60, // 5 minutes
 	})
@@ -42,7 +42,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		Value:    state,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   os.Getenv("APP_ENV") == "PROD",
+		Secure:   env.IsProd(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   5 * 60, // 5 minutes
 	})
@@ -57,23 +57,14 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func getMalTokenUrl(state string, codeChallenge string) (string, error) {
-	tokenUrl, err := url.Parse(os.Getenv("MAL_BASE_URL") + "/v1/oauth2/authorize")
+	tokenUrl, err := url.Parse(env.MustGet("MAL_BASE_URL") + "/v1/oauth2/authorize")
 	if err != nil {
 		return "", err
 	}
 
-	malClientId := os.Getenv("MAL_CLIENT_ID")
-	if malClientId == "" {
-		return "", fmt.Errorf("MAL_CLIENT_ID environment variable is not set")
-	}
-	malRedirectUri := os.Getenv("MAL_REDIRECT_URI")
-	if malRedirectUri == "" {
-		return "", fmt.Errorf("MAL_REDIRECT_URI environment variable is not set")
-	}
-
 	params := url.Values{}
-	params.Add("client_id", malClientId)
-	params.Add("redirect_uri", malRedirectUri)
+	params.Add("client_id", env.MustGet("MAL_CLIENT_ID"))
+	params.Add("redirect_uri", env.MustGet("MAL_REDIRECT_URI"))
 	params.Add("state", state)
 	params.Add("code_challenge", codeChallenge)
 	params.Add("code_challenge_method", "plain")

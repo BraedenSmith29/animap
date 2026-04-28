@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
+
+	"github.com/braedensmith29/animap/server/env"
 )
 
 type MalTokenResponse struct {
@@ -38,7 +39,7 @@ func handleMalTokenResponse(w http.ResponseWriter, response *http.Response) {
 		Value:    tokenResp.RefreshToken,
 		Path:     "/auth/malRefresh",
 		HttpOnly: true,
-		Secure:   os.Getenv("APP_ENV") == "PROD",
+		Secure:   env.IsProd(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   31 * 24 * 60 * 60, // 31 days
 	})
@@ -48,7 +49,7 @@ func handleMalTokenResponse(w http.ResponseWriter, response *http.Response) {
 		Value:    "true",
 		Path:     "/",
 		HttpOnly: false,
-		Secure:   os.Getenv("APP_ENV") == "PROD",
+		Secure:   env.IsProd(),
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   31 * 24 * 60 * 60, // 31 days
 	})

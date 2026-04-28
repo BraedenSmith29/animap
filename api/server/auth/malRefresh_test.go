@@ -4,15 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 )
 
 func TestHandleMalRefresh(t *testing.T) {
-	os.Setenv("MAL_CLIENT_ID", "test_client_id")
-	os.Setenv("MAL_CLIENT_SECRET", "test_client_secret")
-	defer os.Unsetenv("MAL_CLIENT_ID")
-	defer os.Unsetenv("MAL_CLIENT_SECRET")
+	t.Setenv("APP_ENV", "TEST")
+	t.Setenv("MAL_CLIENT_ID", "test_client_id")
+	t.Setenv("MAL_CLIENT_SECRET", "test_client_secret")
 
 	// Mock MAL server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -45,8 +43,7 @@ func TestHandleMalRefresh(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	os.Setenv("MAL_BASE_URL", ts.URL)
-	defer os.Unsetenv("MAL_BASE_URL")
+	t.Setenv("MAL_BASE_URL", ts.URL)
 
 	req := httptest.NewRequest("POST", "/auth/malRefresh", nil)
 	req.AddCookie(&http.Cookie{Name: "refresh_token", Value: "old_refresh_token"})
