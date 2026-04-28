@@ -1,4 +1,11 @@
-export type ListStatus = 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch';
+export type ListStatus =
+    | 'watching'
+    | 'reading'
+    | 'completed'
+    | 'on_hold'
+    | 'dropped'
+    | 'plan_to_watch'
+    | 'plan_to_read';
 
 export interface ListItem {
     id: string;
