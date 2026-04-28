@@ -115,7 +115,7 @@ export function MalIntegrationProvider({ children }: { children: ReactNode }) {
             const timeout = setTimeout(() => {
                 fetchTokenFromRefresh()
                     .catch(error => console.error('Error fetching token from refresh:', error));
-            }, expiresIn * 1000 - 60000);
+            }, Math.min((expiresIn * 1000) - 60000, (2 ** 31) - 1));
             return () => clearTimeout(timeout);
         }
     }, [accessToken, expiresIn, fetchTokenFromRefresh]);
