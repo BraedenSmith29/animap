@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
-import { Graph, Home, AuthCallback } from '@/pages';
+import { Graph, Home, AuthCallback, PrivacyPolicy, TermsOfUse } from '@/pages';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import { SearchFilterProvider } from '@/context/searchFilter';
 import { MalIntegrationProvider } from '@/context/malIntegration';
@@ -14,6 +14,8 @@ createRoot(document.getElementById('app')!).render(
                     <Routes>
                         <Route index element={<Home />} />
                         <Route path="callback" element={<AuthCallback />} />
+                        <Route path="privacy" element={<PrivacyPolicy />} />
+                        <Route path="terms" element={<TermsOfUse />} />
                         <Route path=":type/:id" element={<Graph />} />
                     </Routes>
                 </BrowserRouter>
