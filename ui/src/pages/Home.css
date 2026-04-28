@@ -37,10 +37,24 @@
 }
 
 /* ── Footer Links ─────────────────────────────────────── */
-.home__mal,
-.home__github {
+.home__footer-left,
+.home__footer-right {
     position: fixed;
     bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.home__footer-left {
+    left: 1.25rem;
+}
+
+.home__footer-right {
+    right: 1.25rem;
+}
+
+.home__footer-link {
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -52,16 +66,7 @@
     border-radius: 6px;
 }
 
-.home__mal {
-    left: 1.25rem;
-}
-
-.home__github {
-    right: 1.25rem;
-}
-
-.home__mal:hover,
-.home__github:hover {
+.home__footer-link:hover {
     color: var(--color-text-primary);
     background: var(--color-bg-secondary);
 }
