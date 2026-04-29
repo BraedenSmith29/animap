@@ -19,10 +19,15 @@ func main() {
 		log.Fatalf("No APP_ENV environment variable set")
 	}
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatalf("No PORT environment variable set")
+	}
+
 	router := server.NewRouter()
 
-	log.Println("API server listening on :8080")
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	log.Printf("API server listening on :%s", port)
+	if err := http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
 }
