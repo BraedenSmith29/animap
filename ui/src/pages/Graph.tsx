@@ -47,7 +47,6 @@ export function Graph() {
                     setIsSidebarClosing(false);
                 }}
                 deleteSubgraph={deleteSubgraph}
-                expandGraph={expandGraph}
             />
         )}
         {selectedNode && selectedNode.nodeType === null && (

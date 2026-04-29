@@ -1,17 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import './DetailsSidebar.css';
 import type { Anime } from '@/types';
-import { Icon } from '@/components/Icon';
 import { Button } from '@/components/button';
-import { useClickOutside } from '@/hooks';
 import { useMalIntegration } from '@/context/malIntegration';
 
 type Props = {
     anime: Anime;
-    isClosing: boolean;
-    onClose: () => void;
-    onClosed: () => void;
-    onDelete: (nodeId: string) => void;
 };
 
 const formatEnumValue = (value?: string | null) => {
@@ -65,10 +59,8 @@ const formatRuntime = (totalMinutes: number | null) => {
     }
 };
 
-export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed, onDelete }: Props) {
+export function AnimeDetailsSidebar({ anime }: Props) {
     const { isAuthenticated, animangaList, addToList } = useMalIntegration();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const menuRef = useClickOutside<HTMLDivElement>(useCallback(() => setIsMenuOpen(false), []));
     const coverUrl = anime.portraitImage || '';
     const title = anime.title || 'Untitled Anime';
     const subtitle = anime.enTitle || anime.jaTitle || 'No alternate title available';
@@ -86,126 +78,83 @@ export function AnimeDetailsSidebar({ anime, isClosing, onClose, onClosed, onDel
     );
 
     return (
-        <aside
-            className={`sidebar ${isClosing ? 'sidebar--closing' : ''}`.trim()}
-            onAnimationEnd={() => {
-                if (isClosing) {
-                    onClosed();
-                }
-            }}
-        >
-            <div className="sidebar__header">
-                <button type="button" className="sidebar__header-button" onClick={onClose} aria-label="Close sidebar">
-                    <Icon type="close" />
-                </button>
-                <p className="sidebar__heading">Details</p>
-                <div ref={menuRef}>
-                    <button
-                        type="button"
-                        className="sidebar__header-button"
-                        aria-label="Options"
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    >
-                        <Icon type="dots-three" />
-                    </button>
-
-                    {isMenuOpen && (
-                        <div className="sidebar__menu">
-                            <button
-                                type="button"
-                                className="sidebar__menu-item sidebar__menu-item--danger"
-                                onClick={() => {
-                                    setIsMenuOpen(false);
-                                    onClose();
-                                    onDelete(`anime${anime.malId}`);
-                                }}
-                            >
-                                <Icon type="close" />
-                                Delete Node
-                            </button>
-                        </div>
-                    )}
-                </div>
+        <>
+            <div className="sidebar__image-border">
+                {coverUrl ? (
+                    <img className="sidebar__image" src={coverUrl} alt={`${title} cover`} />
+                ) : (
+                    <span className="sidebar__image-fallback">No cover image</span>
+                )}
             </div>
 
-            <div className="sidebar__content">
-                <div className="sidebar__image-border">
-                    {coverUrl ? (
-                        <img className="sidebar__image" src={coverUrl} alt={`${title} cover`} />
-                    ) : (
-                        <span className="sidebar__image-fallback">No cover image</span>
-                    )}
-                </div>
+            <Button
+                variant="secondary"
+                size="large"
+                className="sidebar__button"
+                href={`https://myanimelist.net/anime/${anime.malId}`}
+            >
+                View on MyAnimeList
+            </Button>
 
+            {isAuthenticated() && !inList && (
                 <Button
-                    variant="secondary"
+                    variant="primary"
                     size="large"
                     className="sidebar__button"
-                    href={`https://myanimelist.net/anime/${anime.malId}`}
+                    onClick={() => addToList('anime', anime.malId)}
                 >
-                    View on MyAnimeList
+                    Add to List
                 </Button>
+            )}
 
-                {isAuthenticated() && !inList && (
-                    <Button
-                        variant="primary"
-                        size="large"
-                        className="sidebar__button"
-                        onClick={() => addToList('anime', anime.malId)}
-                    >
-                        Add to List
-                    </Button>
-                )}
+            <h2 className="sidebar__title">{title}</h2>
+            <p className="sidebar__subtitle">{subtitle}</p>
 
-                <h2 className="sidebar__title">{title}</h2>
-                <p className="sidebar__subtitle">{subtitle}</p>
-
-                <div className="sidebar__stats-grid">
-                    <div className="sidebar__stat-card">
-                        <span className="sidebar__stat-label">Score</span>
-                        <span className="sidebar__stat-value">{formatNumber(anime.score)}</span>
-                    </div>
-                    <div className="sidebar__stat-card">
-                        <span className="sidebar__stat-label">Users</span>
-                        <span className="sidebar__stat-value">{formatNumber(anime.members)}</span>
-                    </div>
-                    <div className="sidebar__stat-card">
-                        <span className="sidebar__stat-label">Type</span>
-                        <span className="sidebar__stat-value">{formatEnumValue(anime.mediaType)}</span>
-                    </div>
-                    {anime.episodes && anime.episodes > 1 ?
-                        <div className="sidebar__stat-card">
-                            <span className="sidebar__stat-label">Episodes</span>
-                            <span className="sidebar__stat-value">{formatNumber(anime.episodes)}</span>
-                        </div>
-                        : <div className="sidebar__stat-card">
-                            <span className="sidebar__stat-label">Runtime</span>
-                            <span
-                                className="sidebar__stat-value">{formatRuntime(anime.duration)}</span>
-                        </div>
-                    }
+            <div className="sidebar__stats-grid">
+                <div className="sidebar__stat-card">
+                    <span className="sidebar__stat-label">Score</span>
+                    <span className="sidebar__stat-value">{formatNumber(anime.score)}</span>
                 </div>
-
-                <div className="sidebar__meta-card">
-                    <p>{formatMonthYear(anime.startDate)} - {formatMonthYear(anime.endDate)}</p>
-                    <p>{formatEnumValue(anime.status)}</p>
+                <div className="sidebar__stat-card">
+                    <span className="sidebar__stat-label">Users</span>
+                    <span className="sidebar__stat-value">{formatNumber(anime.members)}</span>
                 </div>
+                <div className="sidebar__stat-card">
+                    <span className="sidebar__stat-label">Type</span>
+                    <span className="sidebar__stat-value">{formatEnumValue(anime.mediaType)}</span>
+                </div>
+                {anime.episodes && anime.episodes > 1 ?
+                    <div className="sidebar__stat-card">
+                        <span className="sidebar__stat-label">Episodes</span>
+                        <span className="sidebar__stat-value">{formatNumber(anime.episodes)}</span>
+                    </div>
+                    : <div className="sidebar__stat-card">
+                        <span className="sidebar__stat-label">Runtime</span>
+                        <span
+                            className="sidebar__stat-value">{formatRuntime(anime.duration)}</span>
+                    </div>
+                }
+            </div>
 
-                {infoChips.length > 0 && (
-                    <div className="sidebar__chips">
-                        {infoChips.map((chip) => (
-                            <span key={chip} className="sidebar__chip">
+            <div className="sidebar__meta-card">
+                <p>{formatMonthYear(anime.startDate)} - {formatMonthYear(anime.endDate)}</p>
+                <p>{formatEnumValue(anime.status)}</p>
+            </div>
+
+            {infoChips.length > 0 && (
+                <div className="sidebar__chips">
+                    {infoChips.map((chip) => (
+                        <span key={chip} className="sidebar__chip">
                                 {chip}
                             </span>
-                        ))}
-                    </div>
-                )}
+                    ))}
+                </div>
+            )}
 
-                <p className="sidebar__synopsis">{anime.synopsis || 'No synopsis available.'}</p>
+            <p className="sidebar__synopsis">{anime.synopsis || 'No synopsis available.'}</p>
 
-                <dl className="sidebar__details">
-                </dl>
-            </div>
-        </aside>
+            <dl className="sidebar__details">
+            </dl>
+        </>
     );
 }
