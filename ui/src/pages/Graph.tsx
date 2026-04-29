@@ -1,6 +1,6 @@
 import './Graph.css';
 import { useEffect, useState } from 'react';
-import { AniMapCanvas, DetailsSidebar, SearchBar } from '@/components';
+import { AniMapCanvas, DetailsSidebar, EmptyDetailsModal, SearchBar } from '@/components';
 import { useJikanGraph } from '@/hooks';
 import type { Node } from '@/types';
 import { Link, useParams } from 'react-router';
@@ -37,7 +37,7 @@ export function Graph() {
             ? <LoadingScreen progress={progress} />
             : <AniMapCanvas graph={graph} setSelectedNode={handleSelectedNode} />
         }
-        {selectedNode && (
+        {selectedNode && selectedNode.nodeType !== null && (
             <DetailsSidebar
                 node={selectedNode}
                 isClosing={isSidebarClosing}
@@ -48,6 +48,14 @@ export function Graph() {
                 }}
                 deleteSubgraph={deleteSubgraph}
                 expandGraph={expandGraph}
+            />
+        )}
+        {selectedNode && selectedNode.nodeType === null && (
+            <EmptyDetailsModal
+                node={selectedNode}
+                onClose={() => setSelectedNode(null)}
+                onDelete={deleteSubgraph}
+                onExpand={expandGraph}
             />
         )}
     </>;
