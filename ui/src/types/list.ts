@@ -10,6 +10,7 @@ export type ListStatus =
 export interface ListItem {
     id: string;
     status: ListStatus;
+    score: number;
 }
 
 export interface MalListPage {
@@ -19,6 +20,7 @@ export interface MalListPage {
         }
         list_status: {
             status: ListStatus;
+            score: number;
         }
     }[];
     paging: {
