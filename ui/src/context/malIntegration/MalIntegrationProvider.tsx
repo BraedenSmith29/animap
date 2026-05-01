@@ -16,7 +16,7 @@ const authenticatedFetch = async (url: string, accessToken: string, init: Reques
 const fetchSubList = async (mediaType: MediaType, accessToken: string, signal: AbortSignal) => {
     const newList: ListItem[] = [];
 
-    let nextFetch = `https://api.myanimelist.net/v2/users/@me/${mediaType}list?fields=list_status&limit=1000`;
+    let nextFetch = `https://api.myanimelist.net/v2/users/@me/${mediaType}list?fields=list_status&nsfw=true&limit=1000`;
     while (nextFetch) {
         await authenticatedFetch(nextFetch, accessToken, { signal })
             .then(response => response.json())
@@ -24,6 +24,7 @@ const fetchSubList = async (mediaType: MediaType, accessToken: string, signal: A
                 newList.push(...data.data.map(entry => ({
                     id: mediaType + entry.node.id,
                     status: entry.list_status.status,
+                    score: entry.list_status.score,
                 })));
                 nextFetch = data.paging.next ?? '';
             });
@@ -138,6 +139,7 @@ export function MalIntegrationProvider({ children }: { children: ReactNode }) {
             setAnimangaList(prevList => [...prevList, {
                 id: mediaType + id,
                 status: newStatus,
+                score: 0,
             }]);
         }
 
