@@ -19,10 +19,6 @@ export function DetailsSidebar({ node, isClosing, onClose, onClosed, deleteSubgr
 
     const title = node.data.title || 'Untitled';
 
-    if (node.id === 'manga78003') {
-        console.log(node.data.synopsis?.replace(/\n/g, '&nbsp'));
-    }
-
     return (
         <aside
             className={`sidebar ${isClosing ? 'sidebar--closing' : ''}`.trim()}
@@ -95,10 +91,12 @@ export function DetailsSidebar({ node, isClosing, onClose, onClosed, deleteSubgr
                     </div>
                 )}
 
-                {node.nodeType === 'anime'
-                    ? <AnimeStats anime={node.data} />
-                    : <MangaStats manga={node.data} />
-                }
+                <div className="sidebar__stats-grid">
+                    {node.nodeType === 'anime'
+                        ? <AnimeStats anime={node.data} />
+                        : <MangaStats manga={node.data} />
+                    }
+                </div>
 
                 <p className="sidebar__synopsis">{node.data.synopsis || 'No synopsis available.'}</p>
             </div>

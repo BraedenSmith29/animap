@@ -41,9 +41,13 @@ export function getJapaneseTitle(titles: JikanResourceTitle[]): string | null {
     return titles.find(t => t.type === 'Japanese')?.title ?? null;
 }
 
-function stripDate(date: string | null): string | null {
+function formatDate(date: string | null): string | null {
     if (!date) return null;
-    return date.split('T')[0];
+
+    const parsedDate = new Date(date);
+    if (Number.isNaN(parsedDate.getTime())) return null;
+
+    return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(parsedDate);
 }
 
 function isNsfw(item: Anime | Manga): boolean {
@@ -72,8 +76,8 @@ export function createAnimeNode(anime: Anime): AnimeNode {
             jaTitle: getJapaneseTitle(anime.titles),
             portraitImage: getPortraitImage(anime.images),
             nodeImage: getNodeImage(anime.images),
-            startDate: stripDate(anime.aired.from),
-            endDate: stripDate(anime.aired.to),
+            startDate: formatDate(anime.aired.from),
+            endDate: formatDate(anime.aired.to),
             synopsis: anime.synopsis,
             score: anime.score,
             members: anime.members,
@@ -83,7 +87,7 @@ export function createAnimeNode(anime: Anime): AnimeNode {
             episodes: anime.episodes,
             source: anime.source,
             duration: getDurationMinutes(anime.duration),
-            rating: anime.rating ?? null,
+            rating: anime.rating?.split(' - ')[0] ?? null,
         },
     };
 }
@@ -100,8 +104,8 @@ export function createMangaNode(manga: Manga): MangaNode {
             jaTitle: getJapaneseTitle(manga.titles),
             portraitImage: getPortraitImage(manga.images),
             nodeImage: getNodeImage(manga.images),
-            startDate: stripDate(manga.published.from),
-            endDate: stripDate(manga.published.to),
+            startDate: formatDate(manga.published.from),
+            endDate: formatDate(manga.published.to),
             synopsis: manga.synopsis,
             score: manga.score,
             members: manga.members,
