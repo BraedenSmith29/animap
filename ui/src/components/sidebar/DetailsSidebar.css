@@ -83,16 +83,6 @@
     }
 }
 
-.sidebar__title {
-    margin: 0;
-    color: var(--color-text-primary);
-    font-size: 2rem;
-    line-height: 1.1;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    overflow-wrap: anywhere;
-}
-
 .sidebar__heading {
     margin: auto;
     font-size: 1.05rem;
@@ -152,9 +142,20 @@
     padding: 0.6rem;
 }
 
-.sidebar__button {
+.sidebar__titles-section {
     display: flex;
-    width: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sidebar__title {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 2rem;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
 }
 
 .sidebar__subtitle {
@@ -163,6 +164,23 @@
     line-height: 1.2;
     color: var(--color-text-secondary);
     overflow-wrap: anywhere;
+}
+
+.sidebar__nsfw-banner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #3a2528;
+    border: 1px solid #7d4a50;
+}
+
+.sidebar__nsfw-text {
+    font-size: 11px;
+    color: #f0c4c9;
+    font-weight: 500;
+    margin: auto;
 }
 
 .sidebar__stats-grid {
@@ -181,6 +199,19 @@
     border: 1px solid var(--color-border-primary);
 }
 
+.sidebar__stat-card--community-score {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+}
+
+.sidebar__stat-card--community-score .sidebar__stat-card-contents {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
 .sidebar__stat-label {
     font-size: 0.8rem;
     color: var(--color-text-secondary);
@@ -194,28 +225,16 @@
     overflow-wrap: anywhere;
 }
 
-.sidebar__meta-card {
-    border-radius: 10px;
-    padding: 0.75rem 0.85rem;
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border-primary);
-    color: var(--color-text-primary);
+.sidebar__stat-card--release-status {
+    grid-column: span 2;
+    display: flex;
+    gap: 0.5rem;
 }
 
-.sidebar__meta-card p {
+.sidebar__stat-card--release-status .sidebar__stat-value {
     margin: 0;
     font-size: 1rem;
-}
-
-.sidebar__meta-card p + p {
-    margin-top: 0.5rem;
-}
-
-.sidebar__actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-top: auto;
+    font-weight: 500;
 }
 
 .sidebar__chips {
@@ -242,6 +261,7 @@
     font-size: 1.02rem;
     line-height: 1.45;
     overflow-wrap: anywhere;
+    white-space: pre-line;
 }
 
 .sidebar__details {

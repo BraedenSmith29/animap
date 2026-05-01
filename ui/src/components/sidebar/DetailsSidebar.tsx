@@ -1,7 +1,7 @@
 import type { FullNode } from '@/types';
-import { AnimeDetailsSidebar } from '@/components/sidebar/AnimeDetailsSidebar.tsx';
-import { MangaDetailsSidebar } from '@/components/sidebar/MangaDetailsSidebar.tsx';
-import { Icon } from '@/components';
+import { AnimeStats } from '@/components/sidebar/AnimeStats.tsx';
+import { MangaStats } from '@/components/sidebar/MangaStats.tsx';
+import { Button, Icon } from '@/components';
 import { useCallback, useState } from 'react';
 import { useClickOutside } from '@/hooks';
 
@@ -16,6 +16,12 @@ type Props = {
 export function DetailsSidebar({ node, isClosing, onClose, onClosed, deleteSubgraph }: Props) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useClickOutside<HTMLDivElement>(useCallback(() => setIsMenuOpen(false), []));
+
+    const title = node.data.title || 'Untitled';
+
+    if (node.id === 'manga78003') {
+        console.log(node.data.synopsis?.replace(/\n/g, '&nbsp'));
+    }
 
     return (
         <aside
@@ -61,10 +67,40 @@ export function DetailsSidebar({ node, isClosing, onClose, onClosed, deleteSubgr
                 </div>
             </div>
             <div className="sidebar__content">
+                <div className="sidebar__image-border">
+                    {node.data.portraitImage ? (
+                        <img className="sidebar__image" src={node.data.portraitImage} alt={`Cover for ${title}`} />
+                    ) : (
+                        <span className="sidebar__image-fallback">No cover image</span>
+                    )}
+                </div>
+
+                <Button
+                    variant="secondary"
+                    size="large"
+                    href={`https://myanimelist.net/${node.nodeType}/${node.data.malId}`}
+                >
+                    View on MyAnimeList
+                </Button>
+
+                <div className="sidebar__titles-section">
+                    <h2 className="sidebar__title">{title}</h2>
+                    {node.data.enTitle && <p className="sidebar__subtitle">{node.data.enTitle}</p>}
+                    {node.data.jaTitle && <p className="sidebar__subtitle">{node.data.jaTitle}</p>}
+                </div>
+
+                {node.data.nsfw && (
+                    <div className="sidebar__nsfw-banner">
+                        <span className="sidebar__nsfw-text">This title is marked as NSFW</span>
+                    </div>
+                )}
+
                 {node.nodeType === 'anime'
-                    ? <AnimeDetailsSidebar anime={node.data} />
-                    : <MangaDetailsSidebar manga={node.data} />
+                    ? <AnimeStats anime={node.data} />
+                    : <MangaStats manga={node.data} />
                 }
+
+                <p className="sidebar__synopsis">{node.data.synopsis || 'No synopsis available.'}</p>
             </div>
         </aside>
     );
