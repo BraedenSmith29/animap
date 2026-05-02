@@ -86,6 +86,25 @@ export function Filter({ filter, onFilterSave, onClose, onGraphPage }: FilterPro
                             setLocalFilter={setLocalFilter}
                         />
                     )}
+                    <div className="filter__filter-section">
+                        <div className="filter__filter-label">Properties</div>
+                        <div className="filter__filter-grid">
+                            <label className="filter__filter-checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={!localFilter.hideNSFW}
+                                    onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setLocalFilter(prev => ({
+                                            ...prev,
+                                            hideNSFW: !checked,
+                                        }));
+                                    }}
+                                />
+                                <span>Show NSFW</span>
+                            </label>
+                        </div>
+                    </div>
 
                     <div className="filter__filter-actions">
                         <Button

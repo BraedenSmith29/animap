@@ -27,6 +27,7 @@ export type MediaTypeFilter = AnimeSearchType | MangaSearchType;
 export interface FullSearchFilter {
     category: SearchFilter;
     excludedMediaTypes: MediaTypeFilter[];
+    hideNSFW: boolean;
 }
 
 export interface SearchResult {

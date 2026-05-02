@@ -39,6 +39,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             } else {
                 continue;
             }
+            if (newNode.data.nsfw && filter.hideNSFW) continue;
             newNodes.push(newNode);
             setProgress(newNodes.length);
 
