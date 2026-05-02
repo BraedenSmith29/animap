@@ -4,21 +4,32 @@ import (
 	"errors"
 	"io"
 	"log"
+	"mime"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/braedensmith29/animap/server/env"
 )
 
 const (
 	proxyTimeout         = 10 * time.Second
 	maxResponseBodyBytes = 10 << 20 // 10 MiB
+	maxRequestBodyBytes  = 1 << 20  // 1 MiB
 )
 
 var client = &http.Client{Timeout: proxyTimeout}
 
 func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet && r.Method != http.MethodPut {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodyBytes)
+
 	targetUrl := r.URL.Query().Get("url")
 	if targetUrl == "" {
 		http.Error(w, "url query parameter is required", http.StatusBadRequest)
@@ -33,6 +44,11 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 
 	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
 		http.Error(w, "url must use http or https", http.StatusBadRequest)
+		return
+	}
+
+	if env.IsProd() && parsedURL.Scheme != "https" {
+		http.Error(w, "url must use https", http.StatusBadRequest)
 		return
 	}
 
@@ -80,10 +96,15 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Copy content-type header from the fetched response
-	if contentType := resp.Header.Get("Content-Type"); contentType != "" {
-		w.Header().Set("Content-Type", contentType)
+	contentType := resp.Header.Get("Content-Type")
+	if !isAllowedProxyContentType(contentType) {
+		http.Error(w, "upstream response content type is not allowed", http.StatusBadGateway)
+		return
 	}
+
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+
 	// Copy cache-control header from the fetched response
 	if cacheControl := resp.Header.Get("Cache-Control"); cacheControl != "" {
 		w.Header().Set("Cache-Control", cacheControl)
@@ -109,4 +130,26 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 func isAllowedMALHost(hostname string) bool {
 	host := strings.ToLower(strings.TrimSuffix(hostname, "."))
 	return host == "myanimelist.net" || strings.HasSuffix(host, ".myanimelist.net")
+}
+
+func isAllowedProxyContentType(contentType string) bool {
+	mediaType, _, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		return false
+	}
+
+	mediaType = strings.ToLower(mediaType)
+
+	switch mediaType {
+	case
+		"application/json",
+		"image/jpeg",
+		"image/png",
+		"image/gif",
+		"image/webp",
+		"image/avif":
+		return true
+	default:
+		return false
+	}
 }
