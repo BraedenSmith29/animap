@@ -5,6 +5,7 @@ import (
 
 	"github.com/braedensmith29/animap/server/auth"
 	"github.com/braedensmith29/animap/server/handlers"
+	"github.com/braedensmith29/animap/server/ui"
 )
 
 func NewRouter() *http.ServeMux {
@@ -16,5 +17,7 @@ func NewRouter() *http.ServeMux {
 
 	mux.HandleFunc("/api/v1/health", handlers.HandleGetHealth)
 	mux.HandleFunc("/api/v1/malProxy", handlers.HandleMalProxy)
+
+	mux.HandleFunc("/", ui.HandleUi)
 	return mux
 }
