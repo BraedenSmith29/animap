@@ -70,39 +70,41 @@ export function Filter({ filter, onFilterSave, onClose, onGraphPage }: FilterPro
                         </div>
                     </div>
 
-                    {localFilter.category !== 'manga' && (
-                        <FilterCheckboxSection
-                            entries={ANIME_MEDIA_TYPES}
-                            label="Anime Types"
-                            localFilter={localFilter}
-                            setLocalFilter={setLocalFilter}
-                        />
-                    )}
-                    {localFilter.category !== 'anime' && (
-                        <FilterCheckboxSection
-                            entries={MANGA_MEDIA_TYPES}
-                            label="Manga Types"
-                            localFilter={localFilter}
-                            setLocalFilter={setLocalFilter}
-                        />
-                    )}
-                    <div className="filter__filter-section">
-                        <div className="filter__filter-label">Properties</div>
-                        <div className="filter__filter-grid">
-                            <label className="filter__filter-checkbox">
-                                <input
-                                    type="checkbox"
-                                    checked={!localFilter.hideNSFW}
-                                    onChange={(e) => {
-                                        const checked = e.target.checked;
-                                        setLocalFilter(prev => ({
-                                            ...prev,
-                                            hideNSFW: !checked,
-                                        }));
-                                    }}
-                                />
-                                <span>Show NSFW</span>
-                            </label>
+                    <div className="filter__filter-selections">
+                        {localFilter.category !== 'manga' && (
+                            <FilterCheckboxSection
+                                entries={ANIME_MEDIA_TYPES}
+                                label="Anime Types"
+                                localFilter={localFilter}
+                                setLocalFilter={setLocalFilter}
+                            />
+                        )}
+                        {localFilter.category !== 'anime' && (
+                            <FilterCheckboxSection
+                                entries={MANGA_MEDIA_TYPES}
+                                label="Manga Types"
+                                localFilter={localFilter}
+                                setLocalFilter={setLocalFilter}
+                            />
+                        )}
+                        <div className="filter__filter-section">
+                            <div className="filter__filter-label">Properties</div>
+                            <div className="filter__filter-grid">
+                                <label className="filter__filter-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        checked={!localFilter.hideNSFW}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setLocalFilter(prev => ({
+                                                ...prev,
+                                                hideNSFW: !checked,
+                                            }));
+                                        }}
+                                    />
+                                    <span>Show NSFW</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 

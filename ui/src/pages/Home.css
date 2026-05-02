@@ -44,6 +44,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    max-width: calc(50% - 1.25rem);
+    flex-wrap: wrap-reverse;
 }
 
 .home__footer-left {

@@ -50,6 +50,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    max-height: 50vh;
 }
 
 @media (max-width: 480px) {
@@ -61,7 +62,8 @@
         right: 0;
         min-width: 0;
         border-radius: 20px 20px 0 0;
-        padding-bottom: 2rem;
+        padding-bottom: 0.75rem;
+        max-height: 70vh;
         animation: slideUp 0.3s ease-out;
     }
 
@@ -96,6 +98,15 @@
 
 .filter__filter-btn {
     flex: 1;
+}
+
+.filter__filter-selections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow: auto;
+    margin: 0 -20px;
+    padding: 0 20px;
 }
 
 .filter__filter-grid {
