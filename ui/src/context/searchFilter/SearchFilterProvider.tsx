@@ -3,10 +3,16 @@ import { DEFAULT_FILTER, SearchFilterContext } from '@/context/searchFilter/Sear
 import type { FullSearchFilter } from '@/types';
 
 export function SearchFilterProvider({ children }: { children: ReactNode }) {
-    const [filter, setFilter] = useState<FullSearchFilter>(DEFAULT_FILTER);
+    const savedFilter = localStorage.getItem('searchFilter');
+    const [filter, setFilter] = useState<FullSearchFilter>(savedFilter ? JSON.parse(savedFilter) : DEFAULT_FILTER);
+
+    const handleSetFilter = (newFilter: FullSearchFilter) => {
+        localStorage.setItem('searchFilter', JSON.stringify(newFilter));
+        setFilter(newFilter);
+    };
 
     return (
-        <SearchFilterContext.Provider value={{ filter, setFilter }}>
+        <SearchFilterContext.Provider value={{ filter, setFilter: handleSetFilter }}>
             {children}
         </SearchFilterContext.Provider>
     );
