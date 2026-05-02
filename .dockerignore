@@ -1,0 +1,10 @@
+# Source control
+.git
+.github
+.gitignore
+
+# Dependency directories
+node_modules
+
+# Environment and secrets
+.env

@@ -11,9 +11,10 @@ COPY /api/go.mod /api/go.sum ./
 RUN go mod download
 COPY /api .
 COPY --from=ui-builder /app/dist ./server/ui/dist
-RUN go build -tags production
+RUN go build -tags production -o animap.bin
 
 FROM alpine:latest
-COPY --from=api-builder /app/animap .
+WORKDIR /app
+COPY --from=api-builder /app/animap.bin .
 EXPOSE 8080
-CMD ["./animap"]
+CMD ["./animap.bin"]
