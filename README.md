@@ -18,13 +18,13 @@ AniMap is a full-stack web application designed to help anime and manga enthusia
 
 **MyAnimeList Integration:** Secure OAuth2 authentication allowing users to sync their personal lists and track progress directly on the graph.
 
-**Filtering:** Filter by category (anime or manga) or media type (TV, Movie, OVA, etc.), and NSFW content.
+**Deep Relationship Exploration:** Recursively crawls the Jikan API to build comprehensive series maps, uncovering distant spin-offs and shared universes.
 
-**Smart Graph Trimming:** Detects and defers loading of nodes likely to be outside the series, shortening load times and giving users more control.
+**Smart Deferred Loading:** Automatically detects and defers loading of "border" nodes (like character crossovers or minor references), preventing graph clutter and optimizing load times.
 
 **Local Cache:** Local caching shortens revisit load times by 99%+, allowing users to explore and refresh without waiting for third-party API rate limits.
 
-**High-Performance Backend:** A Go-based API server handling secure proxying to the MAL API and managing authentication sessions.
+**Filtering:** Filter by category (anime or manga) or media type (TV, Movie, OVA, etc.), and NSFW content.
 
 ---
 
@@ -34,29 +34,36 @@ React was chosen for the powerful Reagraph library, while Go was chosen for its 
 
 ### Frontend
 -   **Framework:** React/TypeScript
--   **Visualization:** Reagraph (WebGL-based graph rendering)
+-   **Visualization:** [Reagraph](https://reagraph.dev/) (WebGL graph engine)
 -   **Styling:** Raw CSS with variables for easy theming
 -   **Build Tool:** Vite
 
 ### Backend
 -   **Language:** Go
--   **Routing:** Standard library `net/http` (leveraging modern `ServeMux` features)
+-   **Routing:** Standard library `net/http`
 
 ### Infrastructure & Deployment
--   **Containerization:** Docker
--   **Reverse Proxy:** Caddy (automatic HTTPS and security headers)
+-   **Containerization:** Docker & Docker Compose
+-   **Reverse Proxy:** Caddy (Automated HTTPS/SSL via Let's Encrypt)
 
 ---
 
-## ⚙️ Architecture & Insights
+## ⚙️ Interesting Engineering Challenges
 
-The application recursively fetches data from the Jikan API (unofficial MAL API) to build a directed graph. It intelligently handles complex relations and avoids redundant fetches using a queue-based expansion strategy. In rate-limit downtime, the proxy is used to fetch node images from MyAnimeList and load them into textures for Reagraph.
+### 1. Navigating Rate Limits
+The Jikan API has strict rate limits. To provide a seamless experience when building large graphs, the frontend implements a **global request queue**.
+-   **Sequential Processing:** All Jikan requests are funneled through a singleton runner that enforces a 1-second delay between calls.
+-   **Retry logic:** If a `429 Too Many Requests` is encountered, the request is automatically pushed back to the front of the queue for immediate retry after the next delay.
+-   **Abortable Requests:** React's `AbortController` is integrated throughout the graph building process, ensuring that if a user navigates away or starts a new search, all pending background requests are immediately cancelled.
 
-Two notable engineering challenges:
+### 2. Preventing "Graph Explosion" (Lazy Loading)
+Anime series can have hundreds of loose relations (e.g., a character appearing in a minor spin-off). For some shows, especially older ones, this can result in massive graphs. Instead, the graph only eagerly loads media that are probably in the core series and the user must choose to extend beyond that.
+-   **Likely Crossover Detection:** Relationships marked as "Character" or "Other" are treated as "border" nodes.
+-   **Deferred Loading:** Instead of fetching these nodes immediately, AniMap renders them as simplified "placeholder" nodes.
+-   **Manual Expansion:** Users can click these border nodes to explicitly trigger a fetch, giving them control over the graph's depth and focus.
 
-**Secure Proxying:** To bypass CORS limitations and keep MAL Client Secrets secure, the Go backend acts as a transparent proxy for authenticated MAL API requests.
-
-**Rate Limiting and Queueing:** Rate limiting and queueing on the frontend allows users to avoid third-party rate limits on large graphs.
+### 3. High-Performance Texture Loading
+Loading all the node images into the graph at the same time overwhelms the browser's request queue and is prohibitively slow. Instead, textures are fetched and loaded asynchronously in a queue which the browser can handle much more easily.
 
 ---
 
