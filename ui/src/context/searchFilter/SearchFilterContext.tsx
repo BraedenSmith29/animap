@@ -9,6 +9,7 @@ interface SearchFilterContextType {
 export const DEFAULT_FILTER: FullSearchFilter = {
     category: 'all',
     excludedMediaTypes: [],
+    hideNSFW: false,
 };
 
 export const SearchFilterContext = createContext<SearchFilterContextType | undefined>(undefined);
