@@ -1,4 +1,4 @@
-import type { AnimeRatingString, AnimeStatus, AnimeType, MangaStatus, MangaType } from '@tutkli/jikan-ts';
+import type { AnimeStatus, AnimeType, MangaStatus, MangaType } from '@tutkli/jikan-ts';
 
 export interface Anime {
     malId: string;
@@ -18,7 +18,7 @@ export interface Anime {
     episodes: number | null;
     source: string | null;
     duration: number | null;
-    rating: AnimeRatingString | null;
+    rating: string | null;
 }
 
 export interface Manga {
