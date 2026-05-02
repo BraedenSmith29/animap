@@ -42,6 +42,10 @@ React was chosen for the powerful Reagraph library, while Go was chosen for its 
 -   **Language:** Go
 -   **Routing:** Standard library `net/http` (leveraging modern `ServeMux` features)
 
+### Infrastructure & Deployment
+-   **Containerization:** Docker
+-   **Reverse Proxy:** Caddy (automatic HTTPS and security headers)
+
 ---
 
 ## ⚙️ Architecture & Insights
@@ -91,3 +95,27 @@ npm install
 npm run dev
 ```
 The frontend will be available at `http://localhost:5173`. Vite is configured to proxy `/api` and `/auth` requests to the Go backend.
+
+---
+
+## 🚀 Deployment
+
+The application is containerized and ready for deployment using Docker Compose.
+
+### 1. Prerequisites
+-   [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+
+### 2. Configuration
+Navigate to the `deploy` directory:
+```bash
+cd deploy
+cp .env.dist .env
+```
+Update the `.env` file with your production values, specifically `SITE_DOMAIN` and your MyAnimeList credentials.
+
+### 3. Launch
+Start the containers in detached mode:
+```bash
+docker compose up -d
+```
+Caddy will automatically handle SSL certificate generation for the domain specified in `SITE_DOMAIN`.
