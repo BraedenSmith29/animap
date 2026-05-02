@@ -36,7 +36,7 @@ export function MangaStats({ manga }: Props) {
             <span className="sidebar__stat-label">Airing Status</span>
             <span className="sidebar__stat-value">{manga.status ?? 'Unknown'}</span>
             <span className="sidebar__stat-value">
-                Published: {manga.startDate ?? 'Unknown'}{includeEndDate && ` - ${manga.endDate}`}
+                Published: {manga.startDate ?? 'Unknown'}{includeEndDate && ` - ${manga.endDate ?? 'Unknown'}`}
             </span>
         </div>
     </>;

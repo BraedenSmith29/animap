@@ -53,7 +53,7 @@ export function AnimeStats({ anime }: Props) {
             <span className="sidebar__stat-label">Airing Status</span>
             <span className="sidebar__stat-value">{anime.status ?? 'Unknown'}</span>
             <span className="sidebar__stat-value">
-                Aired: {anime.startDate ?? 'Unknown'}{includeEndDate && ` - ${anime.endDate}`}
+                Aired: {anime.startDate ?? 'Unknown'}{includeEndDate && ` - ${anime.endDate ?? 'Unknown'}`}
             </span>
         </div>
     </>;

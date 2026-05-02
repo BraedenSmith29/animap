@@ -3,6 +3,16 @@ import { useMemo } from 'react';
 import { useMalIntegration } from '@/context/malIntegration';
 import type { Anime, Manga, MediaType } from '@/types';
 
+const STATUS_MAP: Record<string, string> = {
+    watching: 'Watching',
+    reading: 'Reading',
+    completed: 'Completed',
+    on_hold: 'On Hold',
+    dropped: 'Dropped',
+    plan_to_watch: 'Plan to Watch',
+    plan_to_read: 'Plan to Read',
+};
+
 interface Props {
     mediaType: MediaType;
     media: Anime | Manga;
@@ -18,32 +28,7 @@ export function ListSection({ mediaType, media }: Props) {
     const members = media.members?.toLocaleString() ?? 'Unknown';
     const communityScore = media.score?.toLocaleString() ?? 'Unknown';
 
-    let listStatus;
-    switch (listItem?.status) {
-        case 'watching':
-            listStatus = 'Watching';
-            break;
-        case 'reading':
-            listStatus = 'Reading';
-            break;
-        case 'completed':
-            listStatus = 'Completed';
-            break;
-        case 'on_hold':
-            listStatus = 'On Hold';
-            break;
-        case 'dropped':
-            listStatus = 'Dropped';
-            break;
-        case 'plan_to_watch':
-            listStatus = 'Plan to Watch';
-            break;
-        case 'plan_to_read':
-            listStatus = 'Plan to Read';
-            break;
-        default:
-            listStatus = 'N/A';
-    }
+    const listStatus = (listItem?.status && STATUS_MAP[listItem.status]) || 'N/A';
 
     if (isAuthenticated()) {
         return <>
