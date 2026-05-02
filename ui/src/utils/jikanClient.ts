@@ -63,7 +63,7 @@ export async function getDetailsFromJikan(
             if (error instanceof Error && error.name === 'AbortError') {
                 return null;
             } else {
-                throw error;
+                throw new Error("Error fetching media details from Jikan. Please try refreshing the page or waiting a few minutes.");
             }
         }
 
@@ -73,7 +73,7 @@ export async function getDetailsFromJikan(
         }
 
         if (!response.ok) {
-            throw new Error(response.statusText);
+            throw new Error("Error fetching media details from Jikan. Please try refreshing the page or waiting a few minutes.");
         } else {
             const body = await response.json();
             await cacheSet(key, {
