@@ -5,18 +5,21 @@ package ui
 import (
 	"embed"
 	"net/http"
+	"path"
 )
 
 //go:embed dist
 var dist embed.FS
 
 func HandleUi(w http.ResponseWriter, r *http.Request) {
-	f, err := dist.Open("dist" + r.URL.Path)
+	cleanPath := path.Clean(r.URL.Path)
+	fullPath := path.Join("dist", cleanPath)
+
+	f, err := dist.Open(fullPath)
 	if err != nil {
-		// Fall back to index.html for SPA routing
 		http.ServeFileFS(w, r, dist, "dist/index.html")
 		return
 	}
 	f.Close()
-	http.ServeFileFS(w, r, dist, "dist"+r.URL.Path)
+	http.ServeFileFS(w, r, dist, fullPath)
 }
