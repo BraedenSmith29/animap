@@ -107,7 +107,8 @@ export function MalIntegrationProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (isAuthenticated() && !accessToken) {
             fetchTokenFromRefresh()
-                .catch(error => console.error('Error fetching token from refresh:', error));
+                .catch(error => console.error('Error fetching token from refresh:', error))
+                .finally(logout);
         }
     }, [isAuthenticated, accessToken, fetchTokenFromRefresh]);
 
@@ -115,7 +116,8 @@ export function MalIntegrationProvider({ children }: { children: ReactNode }) {
         if (expiresIn !== null) {
             const timeout = setTimeout(() => {
                 fetchTokenFromRefresh()
-                    .catch(error => console.error('Error fetching token from refresh:', error));
+                    .catch(error => console.error('Error fetching token from refresh:', error))
+                    .finally(logout);
             }, Math.min((expiresIn * 1000) - 60000, (2 ** 31) - 1));
             return () => clearTimeout(timeout);
         }
