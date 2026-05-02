@@ -1,0 +1,3 @@
+animap.itsbraeden.dev {
+    reverse_proxy * animap:8080
+}

@@ -1,0 +1,29 @@
+services:
+  animap:
+    container_name: animap
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    environment:
+      APP_ENV: "$APP_ENV"
+      MAL_BASE_URL: "$MAL_BASE_URL"
+      MAL_CLIENT_ID: "$MAL_CLIENT_ID"
+      MAL_CLIENT_SECRET: "$MAL_CLIENT_SECRET"
+      MAL_REDIRECT_URI: "$MAL_REDIRECT_URI"
+    restart: unless-stopped
+
+  animap-caddy:
+    container_name: animap-caddy
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - animap
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
