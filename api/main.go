@@ -12,7 +12,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file, using system environment variables")
+		log.Println("Unable to load .env file, using system environment variables")
 	}
 
 	if os.Getenv("APP_ENV") == "" {

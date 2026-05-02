@@ -15,6 +15,8 @@ RUN go build -tags production -o animap.bin
 
 FROM alpine:latest
 WORKDIR /app
+RUN addgroup -S animap && adduser -S animap -G animap
 COPY --from=api-builder /app/animap.bin .
+USER animap
 EXPOSE 8080
 CMD ["./animap.bin"]
