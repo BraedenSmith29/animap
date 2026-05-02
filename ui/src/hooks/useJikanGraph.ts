@@ -12,6 +12,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
     const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] });
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [error, setError] = useState<string | null>(null);
     const abortControllersRef = useRef<Set<AbortController>>(new Set<AbortController>());
 
     const fetchJikanGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal, existingNodes: string[] = []): Promise<Graph | void> => {
@@ -28,7 +29,17 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             if (!nextItem) continue;
             const { type, id: currentId } = nextItem;
 
-            const item = await getDetailsFromJikan(type, currentId, signal);
+            let item;
+            try {
+                item = await getDetailsFromJikan(type, currentId, signal);
+            } catch (error) {
+                if (error instanceof Error) {
+                    setError(error.message);
+                } else {
+                    setError("An unknown error occurred.");
+                }
+                throw error;
+            }
             if (!item || filter.excludedMediaTypes.includes(item.type as MediaTypeFilter)) continue;
 
             let newNode: FullNode;
@@ -190,6 +201,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         setLoading(true);
         setGraph({ nodes: [], edges: [] });
         setProgress(0);
+        setError(null);
 
         const controller = new AbortController();
         abortControllersRef.current.add(controller);
@@ -215,5 +227,5 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
         };
     }, [sourceType, sourceId, fetchJikanGraph]);
 
-    return { graph, loading, progress, deleteSubgraph, expandGraph };
+    return { graph, loading, progress, error, deleteSubgraph, expandGraph };
 }

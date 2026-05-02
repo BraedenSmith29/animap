@@ -8,7 +8,7 @@ import { LoadingScreen } from '@/components/loadingScreen/LoadingScreen.tsx';
 
 export function Graph() {
     const { type, id } = useParams();
-    const { graph, loading, progress, deleteSubgraph, expandGraph } = useJikanGraph(type, id);
+    const { graph, loading, progress, error, deleteSubgraph, expandGraph } = useJikanGraph(type, id);
     const [selectedNode, setSelectedNode] = useState<Node | null>(null);
     const [isSidebarClosing, setIsSidebarClosing] = useState(false);
 
@@ -33,29 +33,35 @@ export function Graph() {
             <Link to="/" className="graph__header-title">Ani<span>Map</span></Link>
             <SearchBar onGraphPage={true} />
         </div>
-        {loading
-            ? <LoadingScreen progress={progress} />
-            : <AniMapCanvas graph={graph} setSelectedNode={handleSelectedNode} />
-        }
-        {selectedNode && selectedNode.nodeType !== null && (
-            <DetailsSidebar
-                node={selectedNode}
-                isClosing={isSidebarClosing}
-                onClose={() => handleSelectedNode(null)}
-                onClosed={() => {
-                    setSelectedNode(null);
-                    setIsSidebarClosing(false);
-                }}
-                deleteSubgraph={deleteSubgraph}
-            />
-        )}
-        {selectedNode && selectedNode.nodeType === null && (
-            <EmptyDetailsModal
-                node={selectedNode}
-                onClose={() => setSelectedNode(null)}
-                onDelete={deleteSubgraph}
-                onExpand={expandGraph}
-            />
-        )}
+        {error ? (
+            <div className="error__overlay">
+                <p>{error}</p>
+            </div>
+        ) : <>
+            {loading
+                ? <LoadingScreen progress={progress} />
+                : <AniMapCanvas graph={graph} setSelectedNode={handleSelectedNode} />
+            }
+            {selectedNode && selectedNode.nodeType !== null && (
+                <DetailsSidebar
+                    node={selectedNode}
+                    isClosing={isSidebarClosing}
+                    onClose={() => handleSelectedNode(null)}
+                    onClosed={() => {
+                        setSelectedNode(null);
+                        setIsSidebarClosing(false);
+                    }}
+                    deleteSubgraph={deleteSubgraph}
+                />
+            )}
+            {selectedNode && selectedNode.nodeType === null && (
+                <EmptyDetailsModal
+                    node={selectedNode}
+                    onClose={() => setSelectedNode(null)}
+                    onDelete={deleteSubgraph}
+                    onExpand={expandGraph}
+                />
+            )}
+        </>}
     </>;
 }
