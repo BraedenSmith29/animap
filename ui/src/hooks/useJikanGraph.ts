@@ -36,7 +36,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                 if (error instanceof Error) {
                     setError(error.message);
                 } else {
-                    setError("An unknown error occurred.");
+                    setError('An unknown error occurred.');
                 }
                 throw error;
             }
@@ -79,8 +79,8 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
                     if (newEdges.has(`${targetId}-${sourceId}`)) {
                         const targetNode = newNodes.find((n) => n.id === targetId);
                         if (targetNode && targetNode.nodeType) {
-                            const sourceStartDate = newNode.data.startDate ?? '9999-99-99';
-                            const targetStartDate = targetNode.data.startDate ?? '9999-99-99';
+                            const sourceStartDate = new Date('01 ' + (newNode.data.startDate ?? 'Dec 9999'));
+                            const targetStartDate = new Date('01 ' + (targetNode.data.startDate ?? 'Dec 9999'));
                             if (targetStartDate < sourceStartDate) {
                                 newEdges.delete(edgeId);
                             } else if (targetStartDate > sourceStartDate) {
