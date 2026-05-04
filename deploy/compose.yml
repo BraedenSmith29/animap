@@ -12,17 +12,12 @@ services:
       MAL_REDIRECT_URI: "$MAL_REDIRECT_URI"
     restart: unless-stopped
 
-  animap-caddy:
-    container_name: animap-caddy
-    image: caddy:alpine
+  animap-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: animap-tunnel
     environment:
-      SITE_DOMAIN: "$SITE_DOMAIN"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
+      TUNNEL_TOKEN: "$TUNNEL_TOKEN"
+    command: tunnel --no-autoupdate run
     depends_on:
       - animap
     restart: unless-stopped
