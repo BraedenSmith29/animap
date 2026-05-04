@@ -107,10 +107,11 @@ The frontend will be available at `http://localhost:5173`. Vite is configured to
 
 ## 🚀 Deployment
 
-The application is containerized and ready for deployment using Docker Compose.
+The application is containerized and ready for deployment using Docker Compose and Cloudflare Tunnels.
 
 ### 1. Prerequisites
 -   [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+-   [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/tunnel-guide/)
 
 ### 2. Configuration
 Navigate to the `deploy` directory:
@@ -118,11 +119,11 @@ Navigate to the `deploy` directory:
 cd deploy
 cp .env.dist .env
 ```
-Update the `.env` file with your production values, specifically `SITE_DOMAIN` and your MyAnimeList credentials.
+Update the `.env` file with your production values, specifically `SITE_DOMAIN`, `TUNNEL_TOKEN`, and your MyAnimeList credentials.
 
 ### 3. Launch
 Start the containers in detached mode:
 ```bash
 docker compose up -d
 ```
-Caddy will automatically handle SSL certificate generation for the domain specified in `SITE_DOMAIN`.
+Cloudflare will handle all the TLS termination and routing for you.
