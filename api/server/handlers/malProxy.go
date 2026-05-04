@@ -60,6 +60,11 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
+		var maxBytesError *http.MaxBytesError
+		if errors.As(err, &maxBytesError) {
+			http.Error(w, "failed to read body", http.StatusRequestEntityTooLarge)
+			return
+		}
 		http.Error(w, "failed to read body", http.StatusInternalServerError)
 		return
 	}
@@ -67,9 +72,6 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "failed to create the proxy request", http.StatusInternalServerError)
 		return
-	}
-	req.GetBody = func() (io.ReadCloser, error) {
-		return io.NopCloser(bytes.NewReader(bodyBytes)), nil
 	}
 
 	// Try to get access token from header
