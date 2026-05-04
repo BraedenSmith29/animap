@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"log"
@@ -57,10 +58,18 @@ func HandleMalProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req, err := http.NewRequest(r.Method, parsedURL.String(), r.Body)
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "failed to read body", http.StatusInternalServerError)
+		return
+	}
+	req, err := http.NewRequest(r.Method, parsedURL.String(), bytes.NewReader(bodyBytes))
 	if err != nil {
 		http.Error(w, "failed to create the proxy request", http.StatusInternalServerError)
 		return
+	}
+	req.GetBody = func() (io.ReadCloser, error) {
+		return io.NopCloser(bytes.NewReader(bodyBytes)), nil
 	}
 
 	// Try to get access token from header
