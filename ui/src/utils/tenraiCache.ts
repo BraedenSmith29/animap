@@ -1,7 +1,7 @@
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 
 const DB_NAME = 'animap-db';
-const STORE_NAME = 'jikan-cache';
+const STORE_NAME = 'tenrai-cache';
 
 interface CacheEntry {
     data: Anime | Manga;

@@ -1,14 +1,14 @@
 import './Graph.css';
 import { useEffect, useState } from 'react';
 import { AniMapCanvas, DetailsSidebar, EmptyDetailsModal, SearchBar } from '@/components';
-import { useJikanGraph } from '@/hooks';
+import { useTenraiGraph } from '@/hooks';
 import type { Node } from '@/types';
 import { Link, useParams } from 'react-router';
 import { LoadingScreen } from '@/components/loadingScreen/LoadingScreen.tsx';
 
 export function Graph() {
     const { type, id } = useParams();
-    const { graph, loading, progress, error, deleteSubgraph, expandGraph } = useJikanGraph(type, id);
+    const { graph, loading, progress, error, deleteSubgraph, expandGraph } = useTenraiGraph(type, id);
     const [selectedNode, setSelectedNode] = useState<Node | null>(null);
     const [isSidebarClosing, setIsSidebarClosing] = useState(false);
 

@@ -18,7 +18,7 @@ AniMap is a full-stack web application designed to help anime and manga enthusia
 
 **MyAnimeList Integration:** Secure OAuth2 authentication allowing users to sync their personal lists and track progress directly on the graph.
 
-**Deep Relationship Exploration:** Recursively crawls the Jikan API to build comprehensive series maps, uncovering distant spin-offs and shared universes.
+**Deep Relationship Exploration:** Recursively crawls the Tenrai API to build comprehensive series maps, uncovering distant spin-offs and shared universes.
 
 **Smart Deferred Loading:** Automatically detects and defers loading of "border" nodes (like character crossovers or minor references), preventing graph clutter and optimizing load times.
 
@@ -51,8 +51,8 @@ React was chosen for the powerful Reagraph library, while Go was chosen for its 
 ## ⚙️ Interesting Engineering Challenges
 
 ### 1. Navigating Rate Limits
-The Jikan API has strict rate limits. To provide a seamless experience when building large graphs, the frontend implements a **global request queue**.
--   **Sequential Processing:** All Jikan requests are funneled through a singleton runner that enforces a 1-second delay between calls.
+The Tenrai API has strict rate limits. To provide a seamless experience when building large graphs, the frontend implements a **global request queue**.
+-   **Sequential Processing:** All Tenrai requests are funneled through a singleton runner that enforces a 1-second delay between calls.
 -   **Retry logic:** If a `429 Too Many Requests` is encountered, the request is automatically pushed back to the front of the queue for immediate retry after the next delay.
 -   **Abortable Requests:** React's `AbortController` is integrated throughout the graph building process, ensuring that if a user navigates away or starts a new search, all pending background requests are immediately cancelled.
 

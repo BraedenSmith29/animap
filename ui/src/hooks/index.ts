@@ -1,2 +1,2 @@
-export * from './useJikanGraph.ts';
+export * from './useTenraiGraph.ts';
 export * from './useClickOutside.ts';
