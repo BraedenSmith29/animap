@@ -1,6 +1,8 @@
-import { cacheGet, cacheSet, clearExpired } from '@/utils/jikanCache.ts';
+import { cacheGet, cacheSet, clearExpired } from '@/utils/tenraiCache.ts';
 import type { MediaType } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
+
+const REQUEST_DELAY_MS = 500;
 
 interface QueueItem {
     resolve: () => void;
@@ -20,7 +22,7 @@ async function startRunner() {
     while (nextRequest) {
         nextRequest.resolve();
         if (!nextRequest.signal.aborted) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, REQUEST_DELAY_MS));
         }
         nextRequest = queue.shift();
     }
@@ -39,7 +41,7 @@ async function addToQueue(signal: AbortSignal, skipToFront: boolean) {
     });
 }
 
-export async function getDetailsFromJikan(
+export async function getDetailsFromTenrai(
     type: MediaType,
     currentId: string,
     signal: AbortSignal,
@@ -56,14 +58,14 @@ export async function getDetailsFromJikan(
         let response;
         try {
             response = await fetch(
-                `https://api.jikan.moe/v4/${type}/${currentId}/full`,
+                `https://api.tenrai.org/v1/${type}/${currentId}/full`,
                 { signal },
             );
         } catch (error) {
             if (error instanceof Error && error.name === 'AbortError') {
                 return null;
             } else {
-                throw new Error("Error fetching media details from Jikan. Please try refreshing the page or waiting a few minutes.");
+                throw new Error("Error fetching media details from Tenrai. Please try refreshing the page or waiting a few minutes.");
             }
         }
 
@@ -73,7 +75,7 @@ export async function getDetailsFromJikan(
         }
 
         if (!response.ok) {
-            throw new Error("Error fetching media details from Jikan. Please try refreshing the page or waiting a few minutes.");
+            throw new Error("Error fetching media details from Tenrai. Please try refreshing the page or waiting a few minutes.");
         } else {
             const body = await response.json();
             await cacheSet(key, {

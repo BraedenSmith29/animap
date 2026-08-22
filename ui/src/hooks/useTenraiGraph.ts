@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Edge, FullNode, Graph, MediaType, MediaTypeFilter, Node } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 import { loadTexture } from '@/utils/textureCache.ts';
-import { createAnimeNode, createMangaNode } from '@/utils/jikanProcessing.ts';
-import { getDetailsFromJikan } from '@/utils/jikanClient.ts';
+import { createAnimeNode, createMangaNode } from '@/utils/tenraiProcessing.ts';
+import { getDetailsFromTenrai } from '@/utils/tenraiClient.ts';
 import { useSearchFilter } from '@/context/searchFilter';
 
-export function useJikanGraph(sourceType: string | undefined, sourceId: string | undefined) {
+export function useTenraiGraph(sourceType: string | undefined, sourceId: string | undefined) {
     const { filter } = useSearchFilter();
 
     const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] });
@@ -15,7 +15,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
     const [error, setError] = useState<string | null>(null);
     const abortControllersRef = useRef<Set<AbortController>>(new Set<AbortController>());
 
-    const fetchJikanGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal, existingNodes: string[] = []): Promise<Graph | void> => {
+    const fetchTenraiGraph = useCallback(async (sourceType: MediaType, sourceId: string, signal: AbortSignal, existingNodes: string[] = []): Promise<Graph | void> => {
         const newNodes: Node[] = [];
         const newEdges = new Map<string, Edge>();
         const queue: { type: MediaType, id: string }[] = [{ type: sourceType, id: sourceId }];
@@ -31,7 +31,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
 
             let item;
             try {
-                item = await getDetailsFromJikan(type, currentId, signal);
+                item = await getDetailsFromTenrai(type, currentId, signal);
             } catch (error) {
                 if (error instanceof Error) {
                     setError(error.message);
@@ -174,7 +174,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
 
         const controller = new AbortController();
         abortControllersRef.current.add(controller);
-        fetchJikanGraph(nodeType, malId, controller.signal, graph.nodes.filter((node) => node.nodeType).map((node) => node.id))
+        fetchTenraiGraph(nodeType, malId, controller.signal, graph.nodes.filter((node) => node.nodeType).map((node) => node.id))
             .then((newGraph) => {
                 if (newGraph) {
                     setGraph((oldGraph) => {
@@ -205,7 +205,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
 
         const controller = new AbortController();
         abortControllersRef.current.add(controller);
-        fetchJikanGraph(sourceType, sourceId, controller.signal)
+        fetchTenraiGraph(sourceType, sourceId, controller.signal)
             .then((graph) => {
                 if (graph) {
                     setGraph(graph);
@@ -225,7 +225,7 @@ export function useJikanGraph(sourceType: string | undefined, sourceId: string |
             }
             abortControllersRef.current.clear();
         };
-    }, [sourceType, sourceId, fetchJikanGraph]);
+    }, [sourceType, sourceId, fetchTenraiGraph]);
 
     return { graph, loading, progress, error, deleteSubgraph, expandGraph };
 }

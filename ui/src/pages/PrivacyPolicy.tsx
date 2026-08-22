@@ -31,7 +31,7 @@ export function PrivacyPolicy() {
 
                 <section>
                     <h2>4. Third-Party Services</h2>
-                    <p>AniMap uses the <a href="https://jikan.moe/" target="_blank" rel="noopener noreferrer">Jikan API</a> (an unofficial MyAnimeList API) to fetch anime data. Your data is never sent to Jikan.</p>
+                    <p>AniMap uses the <a href="https://tenrai.org/" target="_blank" rel="noopener noreferrer">Tenrai API</a> (an unofficial MyAnimeList API) to fetch anime data. Your data is never sent to Tenrai.</p>
                     <p>Your use of AniMap is also subject to MyAnimeList's privacy policy when using the integration features.</p>
                 </section>
 
