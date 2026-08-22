@@ -2,6 +2,8 @@ import { cacheGet, cacheSet, clearExpired } from '@/utils/tenraiCache.ts';
 import type { MediaType } from '@/types';
 import type { Anime, Manga } from '@tutkli/jikan-ts/types';
 
+const REQUEST_DELAY_MS = 500;
+
 interface QueueItem {
     resolve: () => void;
     signal: AbortSignal;
@@ -20,7 +22,7 @@ async function startRunner() {
     while (nextRequest) {
         nextRequest.resolve();
         if (!nextRequest.signal.aborted) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, REQUEST_DELAY_MS));
         }
         nextRequest = queue.shift();
     }
